@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Palpites - Dia de Sorte</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    }
+                }
+            },
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+    <!-- Dark mode detection -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-primary mb-6">Gerador de Palpites - Dia de Sorte</h1>
+        
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <div class="w-full md:w-1/2">
+                <h2 class="text-xl font-semibold mb-2">Combinações de Dígitos</h2>
+                <textarea id="digitCombinations" rows="10" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 text-base" readonly></textarea>
+            </div>
+            
+            <div class="w-full md:w-1/2">
+                <h2 class="text-xl font-semibold mb-2">Configurações</h2>
+                <div class="space-y-4 bg-gray-100 dark:bg-gray-800 p-4 rounded">
+                    <div>
+                        <label class="block mb-1">Quantidade de dezenas por palpite:</label>
+                        <input type="number" id="numberPerBet" value="8" min="7" max="15" class="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 text-base">
+                    </div>
+                    <div>
+                        <label class="block mb-1">Número máximo permitido:</label>
+                        <input type="number" id="maxNumber" value="31" min="1" max="99" class="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 text-base">
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="generateBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
+                            Gerar Palpites
+                        </button>
+                        <button id="printBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-2">Tabela de Combinações</h2>
+            <div id="combinationsTable" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                    <thead>
+                        <tr class="bg-gray-100 dark:bg-gray-700">
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dígitos</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Números Possíveis</th>
+                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="combinationsTableBody" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- Dynamic content will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="results" class="mt-6">
+            <h2 class="text-xl font-semibold mb-4">Palpites Gerados</h2>
+            <div id="bettingResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // The 252 digit combinations
+            const digitCombinations = [
+                "0,1,2,3,4", "0,1,2,3,5", "0,1,2,3,6", "0,1,2,3,7", "0,1,2,3,8", "0,1,2,3,9",
+                "0,1,2,4,5", "0,1,2,4,6", "0,1,2,4,7", "0,1,2,4,8", "0,1,2,4,9", "0,1,2,5,6",
+                "0,1,2,5,7", "0,1,2,5,8", "0,1,2,5,9", "0,1,2,6,7", "0,1,2,6,8", "0,1,2,6,9",
+                "0,1,2,7,8", "0,1,2,7,9", "0,1,2,8,9", "0,1,3,4,5", "0,1,3,4,6", "0,1,3,4,7",
+                "0,1,3,4,8", "0,1,3,4,9", "0,1,3,5,6", "0,1,3,5,7", "0,1,3,5,8", "0,1,3,5,9",
+                "0,1,3,6,7", "0,1,3,6,8", "0,1,3,6,9", "0,1,3,7,8", "0,1,3,7,9", "0,1,3,8,9",
+                "0,1,4,5,6", "0,1,4,5,7", "0,1,4,5,8", "0,1,4,5,9", "0,1,4,6,7", "0,1,4,6,8",
+                "0,1,4,6,9", "0,1,4,7,8", "0,1,4,7,9", "0,1,4,8,9", "0,1,5,6,7", "0,1,5,6,8",
+                "0,1,5,6,9", "0,1,5,7,8", "0,1,5,7,9", "0,1,5,8,9", "0,1,6,7,8", "0,1,6,7,9",
+                "0,1,6,8,9", "0,1,7,8,9", "0,2,3,4,5", "0,2,3,4,6", "0,2,3,4,7", "0,2,3,4,8",
+                "0,2,3,4,9", "0,2,3,5,6", "0,2,3,5,7", "0,2,3,5,8", "0,2,3,5,9", "0,2,3,6,7",
+                "0,2,3,6,8", "0,2,3,6,9", "0,2,3,7,8", "0,2,3,7,9", "0,2,3,8,9", "0,2,4,5,6",
+                "0,2,4,5,7", "0,2,4,5,8", "0,2,4,5,9", "0,2,4,6,7", "0,2,4,6,8", "0,2,4,6,9",
+                "0,2,4,7,8", "0,2,4,7,9", "0,2,4,8,9", "0,2,5,6,7", "0,2,5,6,8", "0,2,5,6,9",
+                "0,2,5,7,8", "0,2,5,7,9", "0,2,5,8,9", "0,2,6,7,8", "0,2,6,7,9", "0,2,6,8,9",
+                "0,2,7,8,9", "0,3,4,5,6", "0,3,4,5,7", "0,3,4,5,8", "0,3,4,5,9", "0,3,4,6,7",
+                "0,3,4,6,8", "0,3,4,6,9", "0,3,4,7,8", "0,3,4,7,9", "0,3,4,8,9", "0,3,5,6,7",
+                "0,3,5,6,8", "0,3,5,6,9", "0,3,5,7,8", "0,3,5,7,9", "0,3,5,8,9", "0,3,6,7,8",
+                "0,3,6,7,9", "0,3,6,8,9", "0,3,7,8,9", "0,4,5,6,7", "0,4,5,6,8", "0,4,5,6,9",
+                "0,4,5,7,8", "0,4,5,7,9", "0,4,5,8,9", "0,4,6,7,8", "0,4,6,7,9", "0,4,6,8,9",
+                "0,4,7,8,9", "0,5,6,7,8", "0,5,6,7,9", "0,5,6,8,9", "0,5,7,8,9", "0,6,7,8,9",
+                "1,2,3,4,5", "1,2,3,4,6", "1,2,3,4,7", "1,2,3,4,8", "1,2,3,4,9", "1,2,3,5,6",
+                "1,2,3,5,7", "1,2,3,5,8", "1,2,3,5,9", "1,2,3,6,7", "1,2,3,6,8", "1,2,3,6,9",
+                "1,2,3,7,8", "1,2,3,7,9", "1,2,3,8,9", "1,2,4,5,6", "1,2,4,5,7", "1,2,4,5,8",
+                "1,2,4,5,9", "1,2,4,6,7", "1,2,4,6,8", "1,2,4,6,9", "1,2,4,7,8", "1,2,4,7,9",
+                "1,2,4,8,9", "1,2,5,6,7", "1,2,5,6,8", "1,2,5,6,9", "1,2,5,7,8", "1,2,5,7,9",
+                "1,2,5,8,9", "1,2,6,7,8", "1,2,6,7,9", "1,2,6,8,9", "1,2,7,8,9", "1,3,4,5,6",
+                "1,3,4,5,7", "1,3,4,5,8", "1,3,4,5,9", "1,3,4,6,7", "1,3,4,6,8", "1,3,4,6,9",
+                "1,3,4,7,8", "1,3,4,7,9", "1,3,4,8,9", "1,3,5,6,7", "1,3,5,6,8", "1,3,5,6,9",
+                "1,3,5,7,8", "1,3,5,7,9", "1,3,5,8,9", "1,3,6,7,8", "1,3,6,7,9", "1,3,6,8,9",
+                "1,3,7,8,9", "1,4,5,6,7", "1,4,5,6,8", "1,4,5,6,9", "1,4,5,7,8", "1,4,5,7,9",
+                "1,4,5,8,9", "1,4,6,7,8", "1,4,6,7,9", "1,4,6,8,9", "1,4,7,8,9", "1,5,6,7,8",
+                "1,5,6,7,9", "1,5,6,8,9", "1,5,7,8,9", "1,6,7,8,9", "2,3,4,5,6", "2,3,4,5,7",
+                "2,3,4,5,8", "2,3,4,5,9", "2,3,4,6,7", "2,3,4,6,8", "2,3,4,6,9", "2,3,4,7,8",
+                "2,3,4,7,9", "2,3,4,8,9", "2,3,5,6,7", "2,3,5,6,8", "2,3,5,6,9", "2,3,5,7,8",
+                "2,3,5,7,9", "2,3,5,8,9", "2,3,6,7,8", "2,3,6,7,9", "2,3,6,8,9", "2,3,7,8,9",
+                "2,4,5,6,7", "2,4,5,6,8", "2,4,5,6,9", "2,4,5,7,8", "2,4,5,7,9", "2,4,5,8,9",
+                "2,4,6,7,8", "2,4,6,7,9", "2,4,6,8,9", "2,4,7,8,9", "2,5,6,7,8", "2,5,6,7,9",
+                "2,5,6,8,9", "2,5,7,8,9", "2,6,7,8,9", "3,4,5,6,7", "3,4,5,6,8", "3,4,5,6,9",
+                "3,4,5,7,8", "3,4,5,7,9", "3,4,5,8,9", "3,4,6,7,8", "3,4,6,7,9", "3,4,6,8,9",
+                "3,4,7,8,9", "3,5,6,7,8", "3,5,6,7,9", "3,5,6,8,9", "3,5,7,8,9", "3,6,7,8,9",
+                "4,5,6,7,8", "4,5,6,7,9", "4,5,6,8,9", "4,5,7,8,9", "4,6,7,8,9", "5,6,7,8,9"
+            ];
+
+            // Fill the textarea with the combinations
+            document.getElementById('digitCombinations').value = digitCombinations.join('\n');
+
+            // Function to generate all possible two-digit numbers from the given digits
+            function generateTwoDigitNumbers(digits, maxNumber) {
+                const numbers = [];
+                for (let i = 0; i < digits.length; i++) {
+                    for (let j = 0; j < digits.length; j++) {
+                        const num = parseInt(digits[i] + digits[j]);
+                        // Add number if it's within range and not already in the list
+                        if (num > 0 && num <= maxNumber && !numbers.includes(num)) {
+                            numbers.push(num);
+                        }
+                    }
+                }
+                return numbers.sort((a, b) => a - b);
+            }
+
+            // Function to generate a betting sequence
+            function generateBettingSequence(possibleNumbers, numbersPerBet) {
+                if (possibleNumbers.length < numbersPerBet) {
+                    return null; // Not enough numbers to form a complete bet
+                }
+                return possibleNumbers.slice(0, numbersPerBet);
+            }
+
+            // Function to format a number with leading zero if needed
+            function formatNumber(num) {
+                return num < 10 ? '0' + num : num.toString();
+            }
+
+            // Function to generate and display the results
+            function generateResults() {
+                const maxNumber = parseInt(document.getElementById('maxNumber').value);
+                const numbersPerBet = parseInt(document.getElementById('numberPerBet').value);
+                const resultsContainer = document.getElementById('bettingResults');
+                const tableBody = document.getElementById('combinationsTableBody');
+                
+                resultsContainer.innerHTML = '';
+                tableBody.innerHTML = '';
+
+                digitCombinations.forEach((combination, index) => {
+                    const digits = combination.split(',');
+                    const possibleNumbers = generateTwoDigitNumbers(digits, maxNumber);
+                    
+                    // Add to combinations table
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-2 py-2">${combination}</td>
+                        <td class="px-2 py-2">${possibleNumbers.map(formatNumber).join(' ')}</td>
+                        <td class="px-2 py-2">${possibleNumbers.length}</td>
+                    `;
+                    tableBody.appendChild(row);
+
+                    // Create betting sequence if possible
+                    const bet = generateBettingSequence(possibleNumbers, numbersPerBet);
+                    
+                    if (bet) {
+                        const card = document.createElement('div');
+                        card.className = 'bg-white dark:bg-gray-800 shadow rounded p-4';
+                        card.innerHTML = `
+                            <div class="font-semibold text-primary mb-2">Palpite #${index + 1} - Dígitos: ${combination}</div>
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                ${bet.map(num => `<span class="inline-block bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-sm font-semibold">${formatNumber(num)}</span>`).join('')}
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Total de números possíveis: ${possibleNumbers.length}</div>
+                        `;
+                        resultsContainer.appendChild(card);
+                    } else {
+                        const card = document.createElement('div');
+                        card.className = 'bg-white dark:bg-gray-800 shadow rounded p-4';
+                        card.innerHTML = `
+                            <div class="font-semibold text-red-500 mb-2">Palpite #${index + 1} - Dígitos: ${combination}</div>
+                            <div class="text-sm text-red-400">Não há números suficientes para formar um palpite completo.</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Total de números possíveis: ${possibleNumbers.length}</div>
+                        `;
+                        resultsContainer.appendChild(card);
+                    }
+                });
+            }
+
+            // Add event listener for the generate button
+            document.getElementById('generateBtn').addEventListener('click', generateResults);
+            
+            // Add event listener for the print button
+            document.getElementById('printBtn').addEventListener('click', function() {
+                window.print();
+            });
+
+            // Generate results on page load
+            generateResults();
+        });
+    </script>
+</body>
+</html>
