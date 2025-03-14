@@ -26,6 +26,14 @@
                 page-break-after: always;
             }
         }
+        
+        footer {
+            color: #161515;
+            text-align: center;
+            padding: 5px;
+            margin-bottom: auto;
+            margin-top: 10px; /* Espaço acima do rodapé */
+        }
     </style>
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
@@ -521,25 +529,86 @@
                     const response = await fetch('https://servicebus2.caixa.gov.br/portaldeloterias/api/diadesorte', {
                         method: 'GET',
                         headers: {
-                            'Accept': 'application/json'
-                        }
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                            'Origin': 'https://loterias.caixa.gov.br',
+                            'Referer': 'https://loterias.caixa.gov.br/'
+                        },
+                        mode: 'cors',
+                        cache: 'no-cache'
                     });
                     
                     if (response.ok) {
                         const data = await response.json();
+                        
+                        // Log para depuração
+                        console.log("Resposta da API Caixa:", data);
+                        
                         if (data && data.listaDezenas && Array.isArray(data.listaDezenas)) {
+                            // Obter concursos anteriores se disponíveis
+                            let allResults = [];
+                            
+                            // Adicionar o resultado mais recente
+                            allResults.push(data.listaDezenas.join(' '));
+                            
+                            // Tente obter resultados de concursos anteriores em paralelo
+                            if (data.numero && data.numero > 1) {
+                                try {
+                                    // Vamos tentar buscar os últimos 10 concursos
+                                    const fetchPromises = [];
+                                    const currentContest = data.numero;
+                                    const contestsToFetch = Math.min(10, currentContest - 1);
+                                    
+                                    for (let i = 1; i <= contestsToFetch; i++) {
+                                        const contestNumber = currentContest - i;
+                                        fetchPromises.push(
+                                            fetch(`https://servicebus2.caixa.gov.br/portaldeloterias/api/diadesorte/${contestNumber}`, {
+                                                method: 'GET',
+                                                headers: {
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/json'
+                                                }
+                                            }).then(res => res.json())
+                                        );
+                                    }
+                                    
+                                    const previousContestsData = await Promise.allSettled(fetchPromises);
+                                    
+                                    // Processar os resultados bem-sucedidos
+                                    previousContestsData.forEach(result => {
+                                        if (result.status === 'fulfilled' && result.value && result.value.listaDezenas) {
+                                            allResults.push(result.value.listaDezenas.join(' '));
+                                        }
+                                    });
+                                } catch (err) {
+                                    console.log("Erro ao buscar concursos anteriores:", err);
+                                    // Continue com os resultados que já temos
+                                }
+                            }
+                            
                             return {
                                 success: true,
-                                message: 'Sucesso! Dados obtidos da API Caixa.',
-                                formattedResults: data.listaDezenas.join(' ')
+                                message: `Sucesso! Dados obtidos da API Caixa para ${allResults.length} concurso(s).`,
+                                formattedResults: allResults.join('\n')
+                            };
+                        } else if (data && data.dezenasSorteadasOrdemSorteio && Array.isArray(data.dezenasSorteadasOrdemSorteio)) {
+                            // Campo alternativo se listaDezenas não estiver disponível
+                            return {
+                                success: true,
+                                message: 'Sucesso! Dados obtidos da API Caixa (formato alternativo).',
+                                formattedResults: data.dezenasSorteadasOrdemSorteio.join(' ')
                             };
                         } else {
-                            throw new Error('Formato de dados inválido');
+                            console.error("Estrutura de dados inesperada da API Caixa:", data);
+                            throw new Error('Formato de dados inválido ou inesperado');
                         }
                     } else {
-                        throw new Error(`Status ${response.status}`);
+                        console.error(`Erro na resposta da API Caixa: ${response.status}`);
+                        throw new Error(`Status HTTP: ${response.status}`);
                     }
                 } catch (error) {
+                    console.error("Erro completo na API Caixa:", error);
                     return {
                         success: false,
                         message: `Falha na API Caixa: ${error.message}`
@@ -709,7 +778,7 @@
                             apiStatusContent.innerHTML += `<br>❌ ${resultadoSimplesResult.message}`;
                         }
                         
-                        // Try Caixa API last
+                        // Try Caixa API next (mudando a ordem para tentar esta API antes)
                         apiStatusContent.innerHTML += '<br>Tentando API Caixa...';
                         const caixaResult = await fetchFromCaixaAPI();
                         
@@ -748,5 +817,7 @@
             generateResults();
         });
     </script>
+    
+    <footer>Feito por: <i>Márcio Fernando Maia -  Todos os direitos reservado - 2025</i></footer>
 </body>
 </html>
