@@ -95,20 +95,22 @@
                     <button id="analyzeBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
                         Analisar Frequência
                     </button>
-                    <button id="loadSampleBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Carregar Amostra
-                    </button>
-                    <div class="flex-grow">
-                        <select id="apiSelect" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base">
-                            <option value="auto">Auto (Testar todas as APIs)</option>
+                    <div class="flex flex-col sm:flex-row gap-2 flex-grow">
+                        <select id="apiSelect" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base flex-grow">
+                            <option value="auto">Auto (Testar Todas as APIs)</option>
+                            <option value="caixa">API Caixa Oficial</option>
                             <option value="heroku">API Heroku</option>
-                            <option value="caixa">API Caixa</option>
-                            <option value="resultadosimples">API ResultadoSimples</option>
                             <option value="brasilapi">API Brasil</option>
                         </select>
+                        <select id="modeSelect" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base">
+                            <option value="direct">Acesso Direto</option>
+                            <option value="proxy">Via Proxy CORS</option>
+                            <option value="both">Tentar Ambos</option>
+                        </select>
                     </div>
+                    <input type="number" id="concursoNum" placeholder="Nº do concurso (opcional)" min="1" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base w-48">
                     <button id="fetchResultsBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
-                        <span id="fetchText">Buscar Resultados Online</span>
+                        <span id="fetchText">Buscar Resultados</span>
                         <svg id="loadingSpinner" class="animate-spin ml-2 h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -184,6 +186,56 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Configurações das APIs
+            const API_CONFIG = {
+                // APIs oficiais
+                CAIXA_URL: 'https://servicebus2.caixa.gov.br/portaldeloterias/api/diadesorte',
+                HEROKU_URL: 'https://loteriascaixa-api.herokuapp.com/api/dia-de-sorte',
+                BRASIL_URL: 'https://brasilapi.com.br/api/loterias/v1/dia-de-sorte',
+                
+                // Serviços de proxy CORS
+                CORS_PROXY_URLS: [
+                    'https://corsproxy.io/?',
+                    'https://api.allorigins.win/raw?url=',
+                    'https://cors-anywhere.herokuapp.com/'
+                ]
+            };
+            
+            // Armazenamento de cache local para dados das APIs
+            const LOCAL_CACHE = {
+                setCached: function(key, data, expiresInMinutes = 60) {
+                    try {
+                        const item = {
+                            data: data,
+                            expires: new Date().getTime() + expiresInMinutes * 60 * 1000
+                        };
+                        localStorage.setItem(key, JSON.stringify(item));
+                        return true;
+                    } catch (e) {
+                        console.error("Erro ao armazenar em cache:", e);
+                        return false;
+                    }
+                },
+                
+                getCached: function(key) {
+                    try {
+                        const item = JSON.parse(localStorage.getItem(key));
+                        if (!item) return null;
+                        
+                        // Verifica se expirou
+                        if (new Date().getTime() > item.expires) {
+                            localStorage.removeItem(key);
+                            return null;
+                        }
+                        
+                        return item.data;
+                    } catch (e) {
+                        console.error("Erro ao recuperar cache:", e);
+                        return null;
+                    }
+                }
+            };
+
             // The 252 digit combinations
             const digitCombinations = [
                 "0,1,2,3,4", "0,1,2,3,5", "0,1,2,3,6", "0,1,2,3,7", "0,1,2,3,8", "0,1,2,3,9",
@@ -459,230 +511,276 @@
                 });
             }
 
-            // Sample data for demonstration
-            const sampleResults = `01 03 07 13 18 27 29
-04 07 09 10 14 20 25
-01 04 05 10 15 22 31
-03 09 11 13 14 15 27
-05 07 08 09 10 12 30
-01 05 09 11 15 16 19
-02 04 05 08 09 17 29
-01 06 07 11 18 23 26
-02 03 05 06 09 28 29
-03 07 08 14 15 22 28
-03 06 10 11 15 16 30
-02 04 09 11 17 19 21
-02 06 09 12 13 18 27
-01 02 04 08 11 14 17
-01 03 05 07 09 14 15
-04 09 10 15 17 19 21
-02 05 06 13 15 19 20
-03 04 07 08 09 10 14
-02 03 07 10 13 15 20
-01 06 09 10 16 17 18`;
-
             // Add event listener for analyze button
             document.getElementById('analyzeBtn').addEventListener('click', analyzeFrequency);
             
-            // Add event listener for loading sample data
-            document.getElementById('loadSampleBtn').addEventListener('click', function() {
-                document.getElementById('historicalResults').value = sampleResults;
-            });
+            // ======== FUNÇÕES DE ACESSO À API ========
             
-            // Function to fetch results from the Heroku API (Loteria Federal API)
-            async function fetchFromHerokuAPI() {
-                try {
-                    const response = await fetch('https://loteriascaixa-api.herokuapp.com/api/dia-de-sorte', {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json'
+            // Função genérica para tentar acessar uma URL via múltiplos proxies CORS
+            async function fetchViaProxy(baseUrl, customHeaders = {}) {
+                // Tenta cada proxy disponível
+                for (const proxyUrl of API_CONFIG.CORS_PROXY_URLS) {
+                    try {
+                        // Constrói a URL com o proxy
+                        const url = proxyUrl.includes('?url=') ? 
+                            `${proxyUrl}${encodeURIComponent(baseUrl)}` : 
+                            `${proxyUrl}${baseUrl}`;
+                        
+                        console.log(`Tentando via proxy: ${url}`);
+                        
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                ...customHeaders
+                            },
+                            mode: 'cors'
+                        });
+                        
+                        if (response.ok) {
+                            return await response.json();
                         }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data && Array.isArray(data)) {
-                            return {
-                                success: true,
-                                message: 'Sucesso! Dados obtidos da API Heroku.',
-                                formattedResults: data.map(contest => {
-                                    return contest.dezenas.join(' ');
-                                }).join('\n')
-                            };
-                        } else {
-                            throw new Error('Formato de dados inválido');
-                        }
-                    } else {
-                        throw new Error(`Status ${response.status}`);
+                    } catch (proxyError) {
+                        console.log(`Proxy falhou (${proxyUrl}):`, proxyError);
+                        // Continua para o próximo proxy
                     }
-                } catch (error) {
-                    return {
-                        success: false,
-                        message: `Falha na API Heroku: ${error.message}`
-                    };
                 }
+                
+                throw new Error('Nenhum proxy CORS conseguiu acessar a URL');
             }
-            
-            // Function to fetch results from the Caixa API
-            async function fetchFromCaixaAPI() {
+
+            // ===== API CAIXA =====
+            async function fetchFromCaixaAPI(concursoNum = null, useProxy = false) {
                 try {
-                    const response = await fetch('https://servicebus2.caixa.gov.br/portaldeloterias/api/diadesorte', {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    // Verificar cache primeiro
+                    const cacheKey = concursoNum ? 
+                        `caixa_dia_de_sorte_${concursoNum}` : 
+                        'caixa_dia_de_sorte_latest';
+                    
+                    const cachedData = LOCAL_CACHE.getCached(cacheKey);
+                    
+                    if (cachedData) {
+                        console.log('Usando dados em cache para:', cacheKey);
+                        return {
+                            success: true,
+                            message: `Sucesso! Dados obtidos do cache local (${cachedData.length} concursos).`,
+                            formattedResults: cachedData.join('\n'),
+                            source: 'cache'
+                        };
+                    }
+                    
+                    // Constrói a URL baseada no parâmetro de concurso
+                    const url = concursoNum ? 
+                        `${API_CONFIG.CAIXA_URL}/${concursoNum}` : 
+                        API_CONFIG.CAIXA_URL;
+                    
+                    let data;
+                    
+                    if (useProxy) {
+                        // Acesso via proxy CORS
+                        console.log(`Buscando dados da Caixa via proxy: ${url}`);
+                        data = await fetchViaProxy(url, {
                             'Origin': 'https://loterias.caixa.gov.br',
                             'Referer': 'https://loterias.caixa.gov.br/'
-                        },
-                        mode: 'cors',
-                        cache: 'no-cache'
-                    });
+                        });
+                    } else {
+                        // Acesso direto
+                        console.log(`Buscando dados da Caixa diretamente: ${url}`);
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                                'Origin': 'https://loterias.caixa.gov.br',
+                                'Referer': 'https://loterias.caixa.gov.br/'
+                            },
+                            mode: 'cors',
+                            credentials: 'omit'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`Status HTTP: ${response.status}`);
+                        }
+                        
+                        data = await response.json();
+                    }
                     
-                    if (response.ok) {
-                        const data = await response.json();
+                    console.log("Resposta da API Caixa:", data);
+                    
+                    if (data && data.listaDezenas && Array.isArray(data.listaDezenas)) {
+                        const allResults = [data.listaDezenas.join(' ')];
+                        LOCAL_CACHE.setCached(cacheKey, allResults, 60); // Cache por 60 minutos
                         
-                        // Log para depuração
-                        console.log("Resposta da API Caixa:", data);
-                        
-                        if (data && data.listaDezenas && Array.isArray(data.listaDezenas)) {
-                            // Obter concursos anteriores se disponíveis
-                            let allResults = [];
-                            
-                            // Adicionar o resultado mais recente
-                            allResults.push(data.listaDezenas.join(' '));
-                            
-                            // Tente obter resultados de concursos anteriores em paralelo
-                            if (data.numero && data.numero > 1) {
-                                try {
-                                    // Vamos tentar buscar os últimos 10 concursos
-                                    const fetchPromises = [];
-                                    const currentContest = data.numero;
-                                    const contestsToFetch = Math.min(10, currentContest - 1);
-                                    
-                                    for (let i = 1; i <= contestsToFetch; i++) {
-                                        const contestNumber = currentContest - i;
-                                        fetchPromises.push(
-                                            fetch(`https://servicebus2.caixa.gov.br/portaldeloterias/api/diadesorte/${contestNumber}`, {
-                                                method: 'GET',
-                                                headers: {
-                                                    'Accept': 'application/json',
-                                                    'Content-Type': 'application/json'
-                                                }
-                                            }).then(res => res.json())
-                                        );
-                                    }
-                                    
-                                    const previousContestsData = await Promise.allSettled(fetchPromises);
-                                    
-                                    // Processar os resultados bem-sucedidos
-                                    previousContestsData.forEach(result => {
-                                        if (result.status === 'fulfilled' && result.value && result.value.listaDezenas) {
-                                            allResults.push(result.value.listaDezenas.join(' '));
-                                        }
-                                    });
-                                } catch (err) {
-                                    console.log("Erro ao buscar concursos anteriores:", err);
-                                    // Continue com os resultados que já temos
-                                }
+                        return {
+                            success: true,
+                            message: `Sucesso! Dados obtidos da API oficial da Caixa (concurso ${data.numero}) ${useProxy ? 'via proxy' : 'diretamente'}.`,
+                            formattedResults: allResults.join('\n'),
+                            source: useProxy ? 'caixa-proxy' : 'caixa'
+                        };
+                    } else {
+                        throw new Error('Formato de dados inválido ou inesperado');
+                    }
+                } catch (error) {
+                    console.error(`Erro ao acessar API Caixa ${useProxy ? 'via proxy' : 'diretamente'}:`, error);
+                    return {
+                        success: false,
+                        message: `Falha na API Caixa ${useProxy ? '(via proxy)' : '(acesso direto)'}: ${error.message}`
+                    };
+                }
+            }
+            
+            // ===== API HEROKU =====
+            async function fetchFromHerokuAPI(useProxy = false) {
+                try {
+                    // Verificar cache primeiro
+                    const cacheKey = 'heroku_dia_de_sorte';
+                    const cachedData = LOCAL_CACHE.getCached(cacheKey);
+                    
+                    if (cachedData) {
+                        console.log('Usando dados em cache para Heroku API');
+                        return {
+                            success: true,
+                            message: 'Sucesso! Dados obtidos do cache local (API Heroku).',
+                            formattedResults: cachedData,
+                            source: 'cache'
+                        };
+                    }
+                    
+                    let data;
+                    
+                    if (useProxy) {
+                        // Acesso via proxy CORS
+                        console.log(`Buscando dados da Heroku API via proxy`);
+                        data = await fetchViaProxy(API_CONFIG.HEROKU_URL);
+                    } else {
+                        // Acesso direto  
+                        console.log(`Buscando dados da Heroku API diretamente`);
+                        const response = await fetch(API_CONFIG.HEROKU_URL, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
                             }
-                            
-                            return {
-                                success: true,
-                                message: `Sucesso! Dados obtidos da API Caixa para ${allResults.length} concurso(s).`,
-                                formattedResults: allResults.join('\n')
-                            };
-                        } else if (data && data.dezenasSorteadasOrdemSorteio && Array.isArray(data.dezenasSorteadasOrdemSorteio)) {
-                            // Campo alternativo se listaDezenas não estiver disponível
-                            return {
-                                success: true,
-                                message: 'Sucesso! Dados obtidos da API Caixa (formato alternativo).',
-                                formattedResults: data.dezenasSorteadasOrdemSorteio.join(' ')
-                            };
-                        } else {
-                            console.error("Estrutura de dados inesperada da API Caixa:", data);
-                            throw new Error('Formato de dados inválido ou inesperado');
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`Status ${response.status}`);
                         }
-                    } else {
-                        console.error(`Erro na resposta da API Caixa: ${response.status}`);
-                        throw new Error(`Status HTTP: ${response.status}`);
+                        
+                        data = await response.json();
                     }
-                } catch (error) {
-                    console.error("Erro completo na API Caixa:", error);
-                    return {
-                        success: false,
-                        message: `Falha na API Caixa: ${error.message}`
-                    };
-                }
-            }
-            
-            // Function to fetch results from the Brasil API
-            async function fetchFromBrasilAPI() {
-                try {
-                    const response = await fetch('https://brasilapi.com.br/api/loterias/v1/dia-de-sorte');
                     
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data && data.concursos && Array.isArray(data.concursos)) {
-                            return {
-                                success: true,
-                                message: 'Sucesso! Dados obtidos da API Brasil.',
-                                formattedResults: data.concursos.map(contest => {
-                                    return contest.numeros.join(' ');
-                                }).join('\n')
-                            };
-                        } else {
-                            throw new Error('Formato de dados inválido');
-                        }
-                    } else {
-                        throw new Error(`Status ${response.status}`);
-                    }
-                } catch (error) {
-                    return {
-                        success: false,
-                        message: `Falha na API Brasil: ${error.message}`
-                    };
-                }
-            }
-            
-            // Function to fetch results from ResultadoSimples API
-            async function fetchFromResultadoSimplesAPI() {
-                try {
-                    // Esta é uma nova API que adicionei - ResultadoSimples API
-                    const response = await fetch('https://resultadosimples-api.vercel.app/api/loteria/diadesorte/ultimos');
+                    console.log("Resposta da API Heroku:", data);
                     
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data && data.results && Array.isArray(data.results)) {
-                            return {
-                                success: true,
-                                message: 'Sucesso! Dados obtidos da API ResultadoSimples.',
-                                formattedResults: data.results.map(contest => {
-                                    return contest.numbers.join(' ');
-                                }).join('\n')
-                            };
-                        } else {
-                            throw new Error('Formato de dados inválido');
-                        }
+                    if (data && Array.isArray(data)) {
+                        const formattedResults = data.map(contest => {
+                            return contest.dezenas.join(' ');
+                        }).join('\n');
+                        
+                        // Armazenar em cache
+                        LOCAL_CACHE.setCached(cacheKey, formattedResults, 60); // Cache por 60 minutos
+                        
+                        return {
+                            success: true,
+                            message: `Sucesso! Dados obtidos da API Heroku (${data.length} concursos) ${useProxy ? 'via proxy' : 'diretamente'}.`,
+                            formattedResults: formattedResults,
+                            source: useProxy ? 'heroku-proxy' : 'heroku'
+                        };
                     } else {
-                        throw new Error(`Status ${response.status}`);
+                        throw new Error('Formato de dados inválido');
                     }
                 } catch (error) {
+                    console.error(`Erro ao acessar API Heroku ${useProxy ? 'via proxy' : 'diretamente'}:`, error);
                     return {
                         success: false,
-                        message: `Falha na API ResultadoSimples: ${error.message}`
+                        message: `Falha na API Heroku ${useProxy ? '(via proxy)' : '(acesso direto)'}: ${error.message}`
                     };
                 }
             }
             
-            // Main function to fetch results from multiple APIs with fallback
+            // ===== API BRASIL =====
+            async function fetchFromBrasilAPI(useProxy = false) {
+                try {
+                    // Verificar cache primeiro
+                    const cacheKey = 'brasil_dia_de_sorte';
+                    const cachedData = LOCAL_CACHE.getCached(cacheKey);
+                    
+                    if (cachedData) {
+                        console.log('Usando dados em cache para Brasil API');
+                        return {
+                            success: true,
+                            message: 'Sucesso! Dados obtidos do cache local (API Brasil).',
+                            formattedResults: cachedData,
+                            source: 'cache'
+                        };
+                    }
+                    
+                    let data;
+                    
+                    if (useProxy) {
+                        // Acesso via proxy CORS
+                        console.log(`Buscando dados da Brasil API via proxy`);
+                        data = await fetchViaProxy(API_CONFIG.BRASIL_URL);
+                    } else {
+                        // Acesso direto
+                        console.log(`Buscando dados da Brasil API diretamente`);
+                        const response = await fetch(API_CONFIG.BRASIL_URL, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`Status ${response.status}`);
+                        }
+                        
+                        data = await response.json();
+                    }
+                    
+                    console.log("Resposta da API Brasil:", data);
+                    
+                    if (data && data.concursos && Array.isArray(data.concursos)) {
+                        const formattedResults = data.concursos.map(contest => {
+                            return contest.numeros.join(' ');
+                        }).join('\n');
+                        
+                        // Armazenar em cache
+                        LOCAL_CACHE.setCached(cacheKey, formattedResults, 60);
+                        
+                        return {
+                            success: true,
+                            message: `Sucesso! Dados obtidos da API Brasil (${data.concursos.length} concursos) ${useProxy ? 'via proxy' : 'diretamente'}.`,
+                            formattedResults: formattedResults,
+                            source: useProxy ? 'brasil-proxy' : 'brasil'
+                        };
+                    } else {
+                        throw new Error('Formato de dados inválido');
+                    }
+                } catch (error) {
+                    console.error(`Erro ao acessar API Brasil ${useProxy ? 'via proxy' : 'diretamente'}:`, error);
+                    return {
+                        success: false,
+                        message: `Falha na API Brasil ${useProxy ? '(via proxy)' : '(acesso direto)'}: ${error.message}`
+                    };
+                }
+            }
+            
+            // Função principal para buscar resultados de acordo com as configurações do usuário
             async function fetchResultsFromAPIs() {
                 const spinner = document.getElementById('loadingSpinner');
                 const fetchText = document.getElementById('fetchText');
                 const apiStatus = document.getElementById('apiStatus');
                 const apiStatusContent = document.getElementById('apiStatusContent');
                 const apiSelect = document.getElementById('apiSelect');
+                const modeSelect = document.getElementById('modeSelect');
+                
                 const selectedAPI = apiSelect.value;
+                const accessMode = modeSelect.value; // direct, proxy, or both
+                
+                // Obter o número do concurso (se fornecido)
+                const concursoInput = document.getElementById('concursoNum');
+                const concursoNum = concursoInput.value ? parseInt(concursoInput.value) : null;
                 
                 // Show loading spinner and status
                 spinner.classList.remove('hidden');
@@ -690,123 +788,136 @@
                 apiStatus.classList.remove('hidden');
                 apiStatusContent.innerHTML = 'Iniciando busca de resultados...';
                 
+                if (concursoNum) {
+                    apiStatusContent.innerHTML += `<br>Buscando dados do concurso ${concursoNum}...`;
+                }
+                
                 // Clear any previous results
                 document.getElementById('historicalResults').value = '';
                 
                 try {
-                    // If a specific API is selected
+                    // Se uma API específica foi selecionada
                     if (selectedAPI !== 'auto') {
-                        apiStatusContent.innerHTML += `<br>Tentando a API selecionada: ${selectedAPI}...`;
+                        apiStatusContent.innerHTML += `<br>API selecionada: ${selectedAPI}`;
                         
-                        let result;
-                        switch (selectedAPI) {
-                            case 'heroku':
-                                result = await fetchFromHerokuAPI();
-                                break;
-                            case 'caixa':
-                                result = await fetchFromCaixaAPI();
-                                break;
-                            case 'resultadosimples':
-                                result = await fetchFromResultadoSimplesAPI();
-                                break;
-                            case 'brasilapi':
-                                result = await fetchFromBrasilAPI();
-                                break;
-                            default:
-                                throw new Error('API selecionada inválida');
+                        let result = null;
+                        
+                        // Tenta obter dados de acordo com o modo selecionado
+                        if (accessMode === 'direct' || accessMode === 'both') {
+                            apiStatusContent.innerHTML += '<br>Tentando acesso direto...';
+                            
+                            switch (selectedAPI) {
+                                case 'caixa':
+                                    result = await fetchFromCaixaAPI(concursoNum, false);
+                                    break;
+                                case 'heroku':
+                                    result = await fetchFromHerokuAPI(false);
+                                    break;
+                                case 'brasilapi':
+                                    result = await fetchFromBrasilAPI(false);
+                                    break;
+                            }
+                            
+                            if (result && result.success) {
+                                apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
+                                document.getElementById('historicalResults').value = result.formattedResults;
+                                analyzeFrequency();
+                                
+                                spinner.classList.add('hidden');
+                                fetchText.textContent = 'Buscar Resultados';
+                                return;
+                            } else if (result) {
+                                apiStatusContent.innerHTML += `<br>❌ ${result.message}`;
+                            }
                         }
                         
-                        if (result.success) {
-                            apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
-                            document.getElementById('historicalResults').value = result.formattedResults;
-                            analyzeFrequency();
-                        } else {
-                            apiStatusContent.innerHTML += `<br>❌ ${result.message}`;
-                            apiStatusContent.innerHTML += '<br>⚠️ Carregando dados de amostra...';
-                            document.getElementById('historicalResults').value = sampleResults;
-                            analyzeFrequency();
+                        // Se o modo direto falhou ou foi pulado, tenta via proxy
+                        if (accessMode === 'proxy' || accessMode === 'both') {
+                            apiStatusContent.innerHTML += '<br>Tentando acesso via proxy CORS...';
+                            
+                            switch (selectedAPI) {
+                                case 'caixa':
+                                    result = await fetchFromCaixaAPI(concursoNum, true);
+                                    break;
+                                case 'heroku':
+                                    result = await fetchFromHerokuAPI(true);
+                                    break;
+                                case 'brasilapi':
+                                    result = await fetchFromBrasilAPI(true);
+                                    break;
+                            }
+                            
+                            if (result && result.success) {
+                                apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
+                                document.getElementById('historicalResults').value = result.formattedResults;
+                                analyzeFrequency();
+                                
+                                spinner.classList.add('hidden');
+                                fetchText.textContent = 'Buscar Resultados';
+                                return;
+                            } else if (result) {
+                                apiStatusContent.innerHTML += `<br>❌ ${result.message}`;
+                            }
                         }
+                        
+                        // Se chegou aqui, todas as tentativas falharam
+                        apiStatusContent.innerHTML += '<br>❌ Todas as tentativas falharam para a API selecionada.';
+                        apiStatusContent.innerHTML += '<br>⚠️ Tente outra API ou modifique os parâmetros da busca.';
                     } else {
-                        // Try multiple APIs with fallback
+                        // Modo automático - tenta todas as APIs
                         apiStatusContent.innerHTML += '<br>Modo automático: testando múltiplas APIs...';
                         
-                        // Try Heroku API first
-                        apiStatusContent.innerHTML += '<br>Tentando API Heroku...';
-                        const herokuResult = await fetchFromHerokuAPI();
-                        
-                        if (herokuResult.success) {
-                            apiStatusContent.innerHTML += `<br>✅ ${herokuResult.message}`;
-                            document.getElementById('historicalResults').value = herokuResult.formattedResults;
-                            analyzeFrequency();
+                        // Array com todas as combinações de API e modo de acesso para tentar
+                        const apiOptions = [
+                            // Primeiro tenta Heroku (geralmente mais confiável)
+                            { name: 'heroku', fn: fetchFromHerokuAPI, params: [false], label: 'Heroku (direto)' },
+                            { name: 'heroku', fn: fetchFromHerokuAPI, params: [true], label: 'Heroku (proxy)' },
                             
-                            spinner.classList.add('hidden');
-                            fetchText.textContent = 'Buscar Resultados Online';
-                            return;
-                        } else {
-                            apiStatusContent.innerHTML += `<br>❌ ${herokuResult.message}`;
+                            // Depois Caixa
+                            { name: 'caixa', fn: fetchFromCaixaAPI, params: [concursoNum, false], label: 'Caixa (direto)' },
+                            { name: 'caixa', fn: fetchFromCaixaAPI, params: [concursoNum, true], label: 'Caixa (proxy)' },
+                            
+                            // Por último Brasil
+                            { name: 'brasilapi', fn: fetchFromBrasilAPI, params: [false], label: 'Brasil (direto)' },
+                            { name: 'brasilapi', fn: fetchFromBrasilAPI, params: [true], label: 'Brasil (proxy)' }
+                        ];
+                        
+                        // Tentar cada combinação de API e modo de acesso
+                        for (const option of apiOptions) {
+                            apiStatusContent.innerHTML += `<br>Tentando API ${option.label}...`;
+                            
+                            try {
+                                const result = await option.fn(...option.params);
+                                
+                                if (result.success) {
+                                    apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
+                                    document.getElementById('historicalResults').value = result.formattedResults;
+                                    analyzeFrequency();
+                                    
+                                    spinner.classList.add('hidden');
+                                    fetchText.textContent = 'Buscar Resultados';
+                                    return;
+                                } else {
+                                    apiStatusContent.innerHTML += `<br>❌ ${result.message}`;
+                                }
+                            } catch (apiError) {
+                                apiStatusContent.innerHTML += `<br>❌ Erro inesperado: ${apiError.message}`;
+                            }
                         }
                         
-                        // Try Brasil API next
-                        apiStatusContent.innerHTML += '<br>Tentando API Brasil...';
-                        const brasilResult = await fetchFromBrasilAPI();
-                        
-                        if (brasilResult.success) {
-                            apiStatusContent.innerHTML += `<br>✅ ${brasilResult.message}`;
-                            document.getElementById('historicalResults').value = brasilResult.formattedResults;
-                            analyzeFrequency();
-                            
-                            spinner.classList.add('hidden');
-                            fetchText.textContent = 'Buscar Resultados Online';
-                            return;
-                        } else {
-                            apiStatusContent.innerHTML += `<br>❌ ${brasilResult.message}`;
-                        }
-                        
-                        // Try ResultadoSimples API next
-                        apiStatusContent.innerHTML += '<br>Tentando API ResultadoSimples...';
-                        const resultadoSimplesResult = await fetchFromResultadoSimplesAPI();
-                        
-                        if (resultadoSimplesResult.success) {
-                            apiStatusContent.innerHTML += `<br>✅ ${resultadoSimplesResult.message}`;
-                            document.getElementById('historicalResults').value = resultadoSimplesResult.formattedResults;
-                            analyzeFrequency();
-                            
-                            spinner.classList.add('hidden');
-                            fetchText.textContent = 'Buscar Resultados Online';
-                            return;
-                        } else {
-                            apiStatusContent.innerHTML += `<br>❌ ${resultadoSimplesResult.message}`;
-                        }
-                        
-                        // Try Caixa API next (mudando a ordem para tentar esta API antes)
-                        apiStatusContent.innerHTML += '<br>Tentando API Caixa...';
-                        const caixaResult = await fetchFromCaixaAPI();
-                        
-                        if (caixaResult.success) {
-                            apiStatusContent.innerHTML += `<br>✅ ${caixaResult.message}`;
-                            document.getElementById('historicalResults').value = caixaResult.formattedResults;
-                            analyzeFrequency();
-                            
-                            spinner.classList.add('hidden');
-                            fetchText.textContent = 'Buscar Resultados Online';
-                            return;
-                        } else {
-                            apiStatusContent.innerHTML += `<br>❌ ${caixaResult.message}`;
-                        }
-                        
-                        // If we got here, all APIs failed
-                        apiStatusContent.innerHTML += '<br>⚠️ Todas as APIs falharam. Carregando dados de amostra...';
-                        document.getElementById('historicalResults').value = sampleResults;
-                        analyzeFrequency();
+                        // Se chegou aqui, todas as APIs falharam
+                        apiStatusContent.innerHTML += '<br>❌ Todas as APIs falharam.';
+                        apiStatusContent.innerHTML += '<br>⚠️ Sugestões:';
+                        apiStatusContent.innerHTML += '<br>1. Verifique sua conexão com a internet';
+                        apiStatusContent.innerHTML += '<br>2. Tente novamente mais tarde';
+                        apiStatusContent.innerHTML += '<br>3. Insira manualmente os resultados da loteria';
                     }
                 } catch (error) {
                     apiStatusContent.innerHTML += `<br>❌ Erro geral: ${error.message}`;
-                    // Load sample data as fallback
-                    document.getElementById('historicalResults').value = sampleResults;
-                    analyzeFrequency();
+                    apiStatusContent.innerHTML += '<br>⚠️ Por favor, tente novamente ou insira os dados manualmente.';
                 } finally {
                     spinner.classList.add('hidden');
-                    fetchText.textContent = 'Buscar Resultados Online';
+                    fetchText.textContent = 'Buscar Resultados';
                 }
             }
             
