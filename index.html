@@ -248,6 +248,69 @@
             </div>
         </div>
 
+        <!-- Nova seção para geração de todos os palpites para uma combinação específica -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Gerador por Combinação Específica</h2>
+            <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block mb-2">Selecione uma combinação de dígitos:</label>
+                        <select id="specificCombination" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base">
+                            <!-- Será preenchido dinamicamente -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-2">Dezenas por palpite:</label>
+                        <div class="flex gap-4">
+                            <input type="number" id="specificNumberPerBet" value="7" min="5" max="15" class="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 text-base">
+                            <button id="generateSpecificBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded whitespace-nowrap">
+                                Gerar Palpites
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded">
+                        <div class="font-semibold mb-2">Dezenas possíveis para esta combinação:</div>
+                        <div id="possibleNumbersDisplay" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
+                <div class="mb-4 flex flex-wrap gap-2 justify-between items-center">
+                    <div>
+                        <span class="font-semibold">Total de palpites gerados: </span>
+                        <span id="specificBetCount" class="bg-primary/10 dark:bg-primary/20 text-primary px-2 py-1 rounded-full font-bold">0</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="downloadSpecificBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            Baixar Palpites
+                        </button>
+                    </div>
+                </div>
+
+                <div id="specificBetsResults" class="border-t dark:border-gray-700 pt-4">
+                    <div id="specificResultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Resultados dinâmicos serão mostrados aqui -->
+                    </div>
+                    
+                    <!-- Paginação -->
+                    <div id="paginationContainer" class="mt-6 flex justify-center items-center space-x-2">
+                        <button id="prevPageBtn" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                            Anterior
+                        </button>
+                        <span id="paginationInfo" class="text-sm px-2">Página 1 de 1</span>
+                        <button id="nextPageBtn" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                            Próxima
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="results" class="mt-6">
             <h2 class="text-xl font-semibold mb-4">Palpites Gerados (<span id="totalBetsCount">0</span> palpites)</h2>
             
@@ -381,6 +444,12 @@
             let highBets = [];
             let validBetsCount = 0;
 
+            // Variáveis para a funcionalidade de combinação específica
+            let specificPossibleNumbers = [];
+            let specificGeneratedBets = [];
+            let currentPage = 1;
+            const itemsPerPage = 12;
+
             // Configurar o toggle para a tabela de combinações
             const toggleHeader = document.getElementById('combinationsToggleHeader');
             const tableContainer = document.getElementById('combinationsTableContainer');
@@ -394,6 +463,15 @@
                 } else {
                     tableContainer.style.maxHeight = '0px';
                 }
+            });
+
+            // Preencher o dropdown de combinações específicas
+            const specificComboSelect = document.getElementById('specificCombination');
+            digitCombinations.forEach((combo, index) => {
+                const option = document.createElement('option');
+                option.value = combo;
+                option.textContent = `#${index + 1}: ${combo}`;
+                specificComboSelect.appendChild(option);
             });
 
             // Function to generate all possible two-digit numbers from the given digits
@@ -798,6 +876,196 @@
                 }, 100);
             }
 
+            // Função para configurar paginação dos resultados específicos
+            function setupPagination() {
+                const totalPages = Math.ceil(specificGeneratedBets.length / itemsPerPage);
+                const paginationInfo = document.getElementById('paginationInfo');
+                const prevBtn = document.getElementById('prevPageBtn');
+                const nextBtn = document.getElementById('nextPageBtn');
+                
+                // Atualizar informações de página
+                paginationInfo.textContent = `Página ${currentPage} de ${totalPages || 1}`;
+                
+                // Habilitar/desabilitar botões
+                prevBtn.disabled = currentPage <= 1;
+                nextBtn.disabled = currentPage >= totalPages;
+                
+                // Mostrar resultados da página atual
+                showSpecificBetsPage();
+            }
+
+            // Função para mostrar a página atual de palpites específicos
+            function showSpecificBetsPage() {
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, specificGeneratedBets.length);
+                const resultsContainer = document.getElementById('specificResultsContainer');
+                
+                resultsContainer.innerHTML = '';
+                
+                // Se não há resultados
+                if (specificGeneratedBets.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="col-span-full p-4 text-center text-gray-500 dark:text-gray-400">
+                            Nenhum palpite gerado. Selecione uma combinação e clique em "Gerar Palpites".
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Mostrar palpites da página atual
+                for (let i = startIndex; i < endIndex; i++) {
+                    const bet = specificGeneratedBets[i];
+                    const card = document.createElement('div');
+                    card.className = 'bg-white dark:bg-gray-800 shadow rounded p-4';
+                    
+                    let numbersHTML = '';
+                    bet.numbers.forEach(num => {
+                        const parsedNum = parseInt(num);
+                        const categoryClass = getNumberCategoryClass(parsedNum);
+                        numbersHTML += `<span class="inline-block ${categoryClass} rounded-full px-3 py-1 text-sm font-semibold">${num}</span>`;
+                    });
+                    
+                    const lowCount = bet.numbers.filter(n => parseInt(n) <= 10).length;
+                    const mediumCount = bet.numbers.filter(n => parseInt(n) > 10 && parseInt(n) <= 20).length;
+                    const highCount = bet.numbers.filter(n => parseInt(n) > 20).length;
+                    
+                    card.innerHTML = `
+                        <div class="font-semibold text-primary mb-2">Palpite #${i + 1}</div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            ${numbersHTML}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                            <span class="text-green-600 dark:text-green-400">${lowCount} baixas</span> | 
+                            <span class="text-yellow-600 dark:text-yellow-400">${mediumCount} médias</span> | 
+                            <span class="text-red-600 dark:text-red-400">${highCount} altas</span>
+                        </div>
+                    `;
+                    resultsContainer.appendChild(card);
+                }
+            }
+
+            // Função para gerar todas as combinações possíveis de K elementos em um array
+            function generateCombinations(array, k) {
+                const result = [];
+                
+                // Função recursiva para gerar combinações
+                function backtrack(start, current) {
+                    if (current.length === k) {
+                        result.push([...current]);
+                        return;
+                    }
+                    
+                    for (let i = start; i < array.length; i++) {
+                        current.push(array[i]);
+                        backtrack(i + 1, current);
+                        current.pop();
+                    }
+                }
+                
+                backtrack(0, []);
+                return result;
+            }
+
+            // Função para mostrar os números possíveis para a combinação selecionada
+            function updatePossibleNumbers() {
+                const selectedCombo = document.getElementById('specificCombination').value;
+                const maxNumber = parseInt(document.getElementById('maxNumber').value);
+                const digits = selectedCombo.split(',');
+                
+                specificPossibleNumbers = generateTwoDigitNumbers(digits, maxNumber);
+                
+                // Atualizar a exibição dos números possíveis
+                const display = document.getElementById('possibleNumbersDisplay');
+                display.innerHTML = '';
+                
+                specificPossibleNumbers.forEach(num => {
+                    const numStr = formatNumber(num);
+                    const categoryClass = getNumberCategoryClass(num);
+                    const span = document.createElement('span');
+                    span.className = `inline-block ${categoryClass} rounded-full px-3 py-1 text-sm font-semibold`;
+                    span.textContent = numStr;
+                    display.appendChild(span);
+                });
+                
+                // Limpar resultados anteriores
+                specificGeneratedBets = [];
+                document.getElementById('specificBetCount').textContent = '0';
+                document.getElementById('specificResultsContainer').innerHTML = '';
+                document.getElementById('downloadSpecificBtn').disabled = true;
+                
+                setupPagination();
+            }
+
+            // Função para gerar palpites para a combinação específica
+            function generateSpecificBets() {
+                const numbersPerBet = parseInt(document.getElementById('specificNumberPerBet').value);
+                
+                // Verificar se há números suficientes
+                if (specificPossibleNumbers.length < numbersPerBet) {
+                    alert(`Esta combinação gera apenas ${specificPossibleNumbers.length} números possíveis, o que é insuficiente para formar um palpite com ${numbersPerBet} dezenas.`);
+                    return;
+                }
+                
+                // Calcular todas as combinações possíveis
+                const allCombos = generateCombinations(specificPossibleNumbers, numbersPerBet);
+                specificGeneratedBets = allCombos.map(combo => ({
+                    numbers: combo.map(num => formatNumber(num))
+                }));
+                
+                // Atualizar contador e habilitar botão de download
+                document.getElementById('specificBetCount').textContent = specificGeneratedBets.length;
+                document.getElementById('downloadSpecificBtn').disabled = false;
+                
+                // Configurar paginação e mostrar resultados
+                currentPage = 1;
+                setupPagination();
+            }
+
+            // Função para gerar texto de download dos palpites específicos
+            function generateSpecificDownloadText() {
+                if (specificGeneratedBets.length === 0) return '';
+                
+                const selectedCombo = document.getElementById('specificCombination').value;
+                const numbersPerBet = parseInt(document.getElementById('specificNumberPerBet').value);
+                
+                let text = `PALPITES GERADOS PARA COMBINAÇÃO DE DÍGITOS: ${selectedCombo}\n`;
+                text += `Números por palpite: ${numbersPerBet}\n`;
+                text += `Data de geração: ${new Date().toLocaleDateString()}\n\n`;
+                text += `Total de palpites: ${specificGeneratedBets.length}\n\n`;
+                
+                // Adicionar cada palpite
+                specificGeneratedBets.forEach((bet, index) => {
+                    text += `Palpite #${index + 1}: ${bet.numbers.join(' ')}\n`;
+                });
+                
+                return text;
+            }
+
+            // Função para download dos palpites específicos
+            function downloadSpecificBets() {
+                if (specificGeneratedBets.length === 0) {
+                    alert('Nenhum palpite foi gerado para download.');
+                    return;
+                }
+                
+                const textContent = generateSpecificDownloadText();
+                const blob = new Blob([textContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                
+                // Criar um link temporário e simular clique
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'palpites_específicos.txt';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpar
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+
             // Configurar abas para filtrar os palpites
             function setupTabs() {
                 const allTab = document.getElementById('allBetsTab');
@@ -874,6 +1142,31 @@
             // Add event listener for the download buttons
             document.getElementById('downloadBtn').addEventListener('click', downloadBets);
             document.getElementById('downloadSimpleBtn').addEventListener('click', downloadSimpleBets);
+
+            // Add event listener for the specific combination select
+            document.getElementById('specificCombination').addEventListener('change', updatePossibleNumbers);
+            
+            // Add event listener for the generate specific button
+            document.getElementById('generateSpecificBtn').addEventListener('click', generateSpecificBets);
+            
+            // Add event listener for the download specific button
+            document.getElementById('downloadSpecificBtn').addEventListener('click', downloadSpecificBets);
+            
+            // Add event listeners for pagination
+            document.getElementById('prevPageBtn').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    setupPagination();
+                }
+            });
+            
+            document.getElementById('nextPageBtn').addEventListener('click', function() {
+                const totalPages = Math.ceil(specificGeneratedBets.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    setupPagination();
+                }
+            });
 
             // Function to extract digits from a number
             function getDigits(num) {
@@ -1402,6 +1695,7 @@
             // Generate results on page load
             generateResults();
             setupTabs();
+            updatePossibleNumbers(); // Inicializar a tela de combinação específica
         });
     </script>
     

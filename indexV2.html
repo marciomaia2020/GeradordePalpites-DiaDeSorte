@@ -28,11 +28,59 @@
         }
         
         footer {
-            color: #161515;
-            text-align: center;
-            padding: 5px;
-            margin-bottom: auto;
-            margin-top: 10px; /* Espaço acima do rodapé */
+                color: #161515;
+                text-align: center;
+                padding: 5px;
+                margin-bottom: auto;
+                margin-top: 10px; /* Espaço acima do rodapé */
+        }
+        .small{
+                font-size: 16px;
+                font-style: italic;
+        }
+        
+        .toggle-btn {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-btn.active {
+            transform: rotate(180deg);
+        }
+        
+        .transition-height {
+            transition: max-height 0.5s ease-out;
+            overflow: hidden;
+        }
+        
+        .number-low {
+            background-color: rgba(134, 239, 172, 0.9);
+            color: rgb(22, 101, 52);
+        }
+        
+        .dark .number-low {
+            background-color: rgba(22, 101, 52, 0.7);
+            color: rgb(187, 247, 208);
+        }
+        
+        .number-medium {
+            background-color: rgba(253, 230, 138, 0.9);
+            color: rgb(146, 64, 14);
+        }
+        
+        .dark .number-medium {
+            background-color: rgba(146, 64, 14, 0.7);
+            color: rgb(254, 240, 138);
+        }
+        
+        .number-high {
+            background-color: rgba(252, 165, 165, 0.9);
+            color: rgb(153, 27, 27);
+        }
+        
+        .dark .number-high {
+            background-color: rgba(153, 27, 27, 0.7);
+            color: rgb(254, 202, 202);
         }
     </style>
 </head>
@@ -56,7 +104,7 @@
         
         <div class="flex flex-col md:flex-row gap-4 mb-6">
             <div class="w-full md:w-1/2">
-                <h2 class="text-xl font-semibold mb-2">Combinações de Dígitos</h2>
+                <h2 class="text-xl font-semibold mb-2">Combinações de Dígitos <span class="small">(126 combinações de dígitos)</span></h2>
                 <textarea id="digitCombinations" rows="6" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 text-base" readonly></textarea>
             </div>
             
@@ -70,6 +118,23 @@
                     <div>
                         <label class="block mb-1">Número máximo permitido:</label>
                         <input type="number" id="maxNumber" value="31" min="1" max="31" class="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 text-base">
+                    </div>
+                    <div>
+                        <label class="block mb-1">Distribuição por faixa:</label>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="flex items-center gap-1">
+                                <label for="lowRange" class="whitespace-nowrap">Baixas (1-10):</label>
+                                <input type="number" id="lowRange" value="3" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <label for="mediumRange" class="whitespace-nowrap">Médias (11-20):</label>
+                                <input type="number" id="mediumRange" value="3" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <label for="highRange" class="whitespace-nowrap">Altas (21-31):</label>
+                                <input type="number" id="highRange" value="2" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                            </div>
+                        </div>
                     </div>
                     <div class="flex gap-2">
                         <button id="generateBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
@@ -147,20 +212,27 @@
         </div>
 
         <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-2">Tabela de Combinações</h2>
-            <div id="combinationsTable" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-                    <thead>
-                        <tr class="bg-gray-100 dark:bg-gray-700">
-                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dígitos</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Números Possíveis</th>
-                            <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="combinationsTableBody" class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <!-- Dynamic content will be inserted here -->
-                    </tbody>
-                </table>
+            <div class="flex items-center justify-between cursor-pointer mb-2" id="combinationsToggleHeader">
+                <h2 class="text-xl font-semibold">Tabela de Combinações</h2>
+                <svg class="h-6 w-6 text-gray-500 dark:text-gray-400 toggle-btn" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            <div id="combinationsTableContainer" class="transition-height bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded overflow-x-auto" style="max-height: 0px;">
+                <div id="combinationsTable">
+                    <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                        <thead>
+                            <tr class="bg-gray-100 dark:bg-gray-700">
+                                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dígitos</th>
+                                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Números Possíveis</th>
+                                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="combinationsTableBody" class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <!-- Dynamic content will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -177,7 +249,45 @@
         </div>
 
         <div id="results" class="mt-6">
-            <h2 class="text-xl font-semibold mb-4">Palpites Gerados</h2>
+            <h2 class="text-xl font-semibold mb-4">Palpites Gerados (<span id="totalBetsCount">0</span> palpites)</h2>
+            
+            <div class="mb-4 flex flex-wrap gap-2 justify-between items-center">
+                <div class="flex flex-wrap gap-2">
+                    <div class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm font-medium">
+                        Baixas (1-10): <span id="lowCount">0</span>
+                    </div>
+                    <div class="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded-full text-sm font-medium">
+                        Médias (11-20): <span id="mediumCount">0</span>
+                    </div>
+                    <div class="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-3 py-1 rounded-full text-sm font-medium">
+                        Altas (21-31): <span id="highCount">0</span>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="downloadSimpleBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Somente Dezenas
+                    </button>
+                    <button id="downloadBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Baixar Detalhado
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex border-b dark:border-gray-700">
+                    <button id="allBetsTab" class="py-2 px-4 font-medium border-b-2 border-primary text-primary">Todos</button>
+                    <button id="lowBetsTab" class="py-2 px-4 font-medium text-gray-600 dark:text-gray-400">Baixas</button>
+                    <button id="mediumBetsTab" class="py-2 px-4 font-medium text-gray-600 dark:text-gray-400">Médias</button>
+                    <button id="highBetsTab" class="py-2 px-4 font-medium text-gray-600 dark:text-gray-400">Altas</button>
+                </div>
+            </div>
+            
             <div id="bettingResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Dynamic content will be inserted here -->
             </div>
@@ -236,54 +346,55 @@
                 }
             };
 
-            // The 252 digit combinations
+            // The 126 digit combinations
             const digitCombinations = [
-                "0,1,2,3,4", "0,1,2,3,5", "0,1,2,3,6", "0,1,2,3,7", "0,1,2,3,8", "0,1,2,3,9",
-                "0,1,2,4,5", "0,1,2,4,6", "0,1,2,4,7", "0,1,2,4,8", "0,1,2,4,9", "0,1,2,5,6",
-                "0,1,2,5,7", "0,1,2,5,8", "0,1,2,5,9", "0,1,2,6,7", "0,1,2,6,8", "0,1,2,6,9",
-                "0,1,2,7,8", "0,1,2,7,9", "0,1,2,8,9", "0,1,3,4,5", "0,1,3,4,6", "0,1,3,4,7",
-                "0,1,3,4,8", "0,1,3,4,9", "0,1,3,5,6", "0,1,3,5,7", "0,1,3,5,8", "0,1,3,5,9",
-                "0,1,3,6,7", "0,1,3,6,8", "0,1,3,6,9", "0,1,3,7,8", "0,1,3,7,9", "0,1,3,8,9",
-                "0,1,4,5,6", "0,1,4,5,7", "0,1,4,5,8", "0,1,4,5,9", "0,1,4,6,7", "0,1,4,6,8",
-                "0,1,4,6,9", "0,1,4,7,8", "0,1,4,7,9", "0,1,4,8,9", "0,1,5,6,7", "0,1,5,6,8",
-                "0,1,5,6,9", "0,1,5,7,8", "0,1,5,7,9", "0,1,5,8,9", "0,1,6,7,8", "0,1,6,7,9",
-                "0,1,6,8,9", "0,1,7,8,9", "0,2,3,4,5", "0,2,3,4,6", "0,2,3,4,7", "0,2,3,4,8",
-                "0,2,3,4,9", "0,2,3,5,6", "0,2,3,5,7", "0,2,3,5,8", "0,2,3,5,9", "0,2,3,6,7",
-                "0,2,3,6,8", "0,2,3,6,9", "0,2,3,7,8", "0,2,3,7,9", "0,2,3,8,9", "0,2,4,5,6",
-                "0,2,4,5,7", "0,2,4,5,8", "0,2,4,5,9", "0,2,4,6,7", "0,2,4,6,8", "0,2,4,6,9",
-                "0,2,4,7,8", "0,2,4,7,9", "0,2,4,8,9", "0,2,5,6,7", "0,2,5,6,8", "0,2,5,6,9",
-                "0,2,5,7,8", "0,2,5,7,9", "0,2,5,8,9", "0,2,6,7,8", "0,2,6,7,9", "0,2,6,8,9",
-                "0,2,7,8,9", "0,3,4,5,6", "0,3,4,5,7", "0,3,4,5,8", "0,3,4,5,9", "0,3,4,6,7",
-                "0,3,4,6,8", "0,3,4,6,9", "0,3,4,7,8", "0,3,4,7,9", "0,3,4,8,9", "0,3,5,6,7",
-                "0,3,5,6,8", "0,3,5,6,9", "0,3,5,7,8", "0,3,5,7,9", "0,3,5,8,9", "0,3,6,7,8",
-                "0,3,6,7,9", "0,3,6,8,9", "0,3,7,8,9", "0,4,5,6,7", "0,4,5,6,8", "0,4,5,6,9",
-                "0,4,5,7,8", "0,4,5,7,9", "0,4,5,8,9", "0,4,6,7,8", "0,4,6,7,9", "0,4,6,8,9",
-                "0,4,7,8,9", "0,5,6,7,8", "0,5,6,7,9", "0,5,6,8,9", "0,5,7,8,9", "0,6,7,8,9",
-                "1,2,3,4,5", "1,2,3,4,6", "1,2,3,4,7", "1,2,3,4,8", "1,2,3,4,9", "1,2,3,5,6",
-                "1,2,3,5,7", "1,2,3,5,8", "1,2,3,5,9", "1,2,3,6,7", "1,2,3,6,8", "1,2,3,6,9",
-                "1,2,3,7,8", "1,2,3,7,9", "1,2,3,8,9", "1,2,4,5,6", "1,2,4,5,7", "1,2,4,5,8",
-                "1,2,4,5,9", "1,2,4,6,7", "1,2,4,6,8", "1,2,4,6,9", "1,2,4,7,8", "1,2,4,7,9",
-                "1,2,4,8,9", "1,2,5,6,7", "1,2,5,6,8", "1,2,5,6,9", "1,2,5,7,8", "1,2,5,7,9",
-                "1,2,5,8,9", "1,2,6,7,8", "1,2,6,7,9", "1,2,6,8,9", "1,2,7,8,9", "1,3,4,5,6",
-                "1,3,4,5,7", "1,3,4,5,8", "1,3,4,5,9", "1,3,4,6,7", "1,3,4,6,8", "1,3,4,6,9",
-                "1,3,4,7,8", "1,3,4,7,9", "1,3,4,8,9", "1,3,5,6,7", "1,3,5,6,8", "1,3,5,6,9",
-                "1,3,5,7,8", "1,3,5,7,9", "1,3,5,8,9", "1,3,6,7,8", "1,3,6,7,9", "1,3,6,8,9",
-                "1,3,7,8,9", "1,4,5,6,7", "1,4,5,6,8", "1,4,5,6,9", "1,4,5,7,8", "1,4,5,7,9",
-                "1,4,5,8,9", "1,4,6,7,8", "1,4,6,7,9", "1,4,6,8,9", "1,4,7,8,9", "1,5,6,7,8",
-                "1,5,6,7,9", "1,5,6,8,9", "1,5,7,8,9", "1,6,7,8,9", "2,3,4,5,6", "2,3,4,5,7",
-                "2,3,4,5,8", "2,3,4,5,9", "2,3,4,6,7", "2,3,4,6,8", "2,3,4,6,9", "2,3,4,7,8",
-                "2,3,4,7,9", "2,3,4,8,9", "2,3,5,6,7", "2,3,5,6,8", "2,3,5,6,9", "2,3,5,7,8",
-                "2,3,5,7,9", "2,3,5,8,9", "2,3,6,7,8", "2,3,6,7,9", "2,3,6,8,9", "2,3,7,8,9",
-                "2,4,5,6,7", "2,4,5,6,8", "2,4,5,6,9", "2,4,5,7,8", "2,4,5,7,9", "2,4,5,8,9",
-                "2,4,6,7,8", "2,4,6,7,9", "2,4,6,8,9", "2,4,7,8,9", "2,5,6,7,8", "2,5,6,7,9",
-                "2,5,6,8,9", "2,5,7,8,9", "2,6,7,8,9", "3,4,5,6,7", "3,4,5,6,8", "3,4,5,6,9",
-                "3,4,5,7,8", "3,4,5,7,9", "3,4,5,8,9", "3,4,6,7,8", "3,4,6,7,9", "3,4,6,8,9",
-                "3,4,7,8,9", "3,5,6,7,8", "3,5,6,7,9", "3,5,6,8,9", "3,5,7,8,9", "3,6,7,8,9",
-                "4,5,6,7,8", "4,5,6,7,9", "4,5,6,8,9", "4,5,7,8,9", "4,6,7,8,9", "5,6,7,8,9"
+					"0,1,2,3,4", 	"0,1,2,3,5", 	"0,1,2,3,6",	"0,1,2,3,7",  	"0,1,2,3,8", 	"0,1,2,3,9", 
+					"0,1,2,4,5",	"0,1,2,4,6",  	"0,1,2,4,7",	"0,1,2,4,8",  	"0,1,2,4,9", 	"0,1,2,5,6",  	
+					"0,1,2,5,7", 	"0,1,2,5,8", 	"0,1,2,5,9", 	"0,1,2,6,7",  	"0,1,2,6,8",	"0,1,2,6,9",  	
+					"0,1,2,7,8",	"0,1,2,7,9",  	"0,1,2,8,9",	"0,1,3,4,5",  	"0,1,3,4,6",	"0,1,3,4,7",  
+					"0,1,3,4,8",	"0,1,3,4,9", 	"0,1,3,5,6",	"0,1,3,5,7",  	"0,1,3,5,8",  	"0,1,3,5,9",  
+					"0,1,3,6,7", 	"0,1,3,6,8",  	"0,1,3,6,9",  	"0,1,3,7,8",  	"0,1,3,7,9",  	"0,1,3,8,9",  	
+					"0,1,4,5,6",  	"0,1,4,5,7",  	"0,1,4,5,8",  	"0,1,4,5,9",  	"0,1,4,6,7",  	"0,1,4,6,8",  	
+					"0,1,4,6,9",  	"0,1,4,7,8",  	"0,1,4,7,9",  	"0,1,4,8,9",  	"0,1,5,6,7",  	"0,1,5,6,8",  
+					"0,1,5,7,9",  	"0,1,5,8,9",  	"0,1,6,7,8",  	"0,1,6,7,9",  	"0,1,6,8,9",  	"0,1,7,8,9",  
+					"0,2,3,4,7",  	"0,2,3,4,8", 	"0,2,3,4,9",  	"0,2,3,5,6", 	"0,2,3,5,7",  	"0,2,3,5,8",   		
+					"0,2,3,6,8",  	"0,2,3,6,9", 	"0,2,3,7,8",  	"0,2,3,7,9", 	"0,2,3,8,9",  	"0,2,4,5,6",   	
+					"0,2,4,6,8",  	"0,2,4,6,9",  	"0,2,4,7,8",  	"0,2,4,7,9", 	"0,2,4,8,9",  	"0,2,5,6,7", 	 	
+					"0,2,5,7,8",  	"0,2,5,7,9",  	"0,2,5,8,9",  	"0,2,6,7,8",  	"0,2,6,7,9",  	"0,2,6,8,9",  		
+					"1,2,3,4,6",  	"1,2,3,4,7",  	"1,2,3,4,8",  	"1,2,3,4,9",	"1,2,3,5,6",  	"1,2,3,5,7",  		
+					"1,2,3,6,8",  	"1,2,3,6,9",  	"1,2,3,7,8",  	"1,2,3,7,9",  	"1,2,3,8,9",  	"1,2,4,5,6",  		
+					"1,2,4,5,9",  	"1,2,4,6,7", 	"1,2,4,6,8",  	"1,2,4,6,9",  	"1,2,4,7,8",  	"1,2,4,7,9",  	  
+					"1,2,5,6,8",  	"1,2,5,6,9", 	"1,2,5,7,8",  	"1,2,5,7,9",  	"1,2,5,8,9",  	"1,2,6,7,8",  	
+					"1,2,6,7,9",  	"1,2,6,8,9", 	"1,2,7,8,9",    "0,2,4,5,7",  	"0,2,4,5,8",  	"0,2,4,5,9",  	
+					"0,2,4,6,7", 	"1,2,4,8,9",  	"1,2,5,6,7",	"1,2,4,5,7",  	"1,2,4,5,8",  	"0,2,3,5,9",
+					"1,2,3,5,8", 	"1,2,3,5,9",  	"1,2,3,6,7",   	"0,2,7,8,9",  	"1,2,3,4,5",  	"0,2,3,6,7", 
+					"0,2,5,6,8",  	"0,2,5,6,9",  	"0,1,5,6,9", 	"0,1,5,7,8",  	"0,2,3,4,5",  	"0,2,3,4,6" 		
             ];
 
             // Fill the textarea with the combinations
             document.getElementById('digitCombinations').value = digitCombinations.join('\n');
+
+            // Variáveis para armazenar todos os palpites gerados (para download)
+            let allGeneratedBets = [];
+            let lowBets = [];
+            let mediumBets = [];
+            let highBets = [];
+            let validBetsCount = 0;
+
+            // Configurar o toggle para a tabela de combinações
+            const toggleHeader = document.getElementById('combinationsToggleHeader');
+            const tableContainer = document.getElementById('combinationsTableContainer');
+            const toggleBtn = toggleHeader.querySelector('.toggle-btn');
+            
+            toggleHeader.addEventListener('click', function() {
+                toggleBtn.classList.toggle('active');
+                
+                if (tableContainer.style.maxHeight === '0px' || tableContainer.style.maxHeight === '') {
+                    tableContainer.style.maxHeight = tableContainer.scrollHeight + 'px';
+                } else {
+                    tableContainer.style.maxHeight = '0px';
+                }
+            });
 
             // Function to generate all possible two-digit numbers from the given digits
             function generateTwoDigitNumbers(digits, maxNumber) {
@@ -300,12 +411,93 @@
                 return numbers.sort((a, b) => a - b);
             }
 
-            // Function to generate a betting sequence
-            function generateBettingSequence(possibleNumbers, numbersPerBet) {
+            // Function to shuffle array (Fisher-Yates algorithm)
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // Function to generate a balanced betting sequence with specified distribution
+            function generateBalancedBettingSequence(possibleNumbers, numbersPerBet, lowCount, mediumCount, highCount) {
                 if (possibleNumbers.length < numbersPerBet) {
                     return null; // Not enough numbers to form a complete bet
                 }
-                return possibleNumbers.slice(0, numbersPerBet);
+                
+                // Verify the sum of counts matches the total numbers per bet
+                const totalRequested = lowCount + mediumCount + highCount;
+                if (totalRequested !== numbersPerBet) {
+                    console.warn(`Ajuste nos números solicitados: total ${totalRequested}, necessário ${numbersPerBet}`);
+                    // Adjust counts proportionally
+                    const factor = numbersPerBet / totalRequested;
+                    lowCount = Math.round(lowCount * factor);
+                    mediumCount = Math.round(mediumCount * factor);
+                    highCount = numbersPerBet - lowCount - mediumCount;
+                }
+                
+                // Categorize available numbers
+                const lowNumbers = possibleNumbers.filter(num => num <= 10);
+                const mediumNumbers = possibleNumbers.filter(num => num > 10 && num <= 20);
+                const highNumbers = possibleNumbers.filter(num => num > 20);
+                
+                // Check if we have enough numbers in each category
+                if (lowNumbers.length < lowCount || mediumNumbers.length < mediumCount || highNumbers.length < highCount) {
+                    // Not enough numbers in required distribution, try to adjust
+                    let deficit = 0;
+                    let adjustedLowCount = Math.min(lowCount, lowNumbers.length);
+                    deficit += lowCount - adjustedLowCount;
+                    
+                    let adjustedMediumCount = Math.min(mediumCount, mediumNumbers.length);
+                    deficit += mediumCount - adjustedMediumCount;
+                    
+                    let adjustedHighCount = Math.min(highCount, highNumbers.length);
+                    deficit += highCount - adjustedHighCount;
+                    
+                    // If we can't meet the deficit, return null
+                    if (adjustedLowCount + adjustedMediumCount + adjustedHighCount + deficit > possibleNumbers.length) {
+                        console.warn("Não é possível gerar palpite com a distribuição solicitada");
+                        return null;
+                    }
+                    
+                    // Distribute deficit among available categories
+                    const remainingLow = lowNumbers.length - adjustedLowCount;
+                    const remainingMedium = mediumNumbers.length - adjustedMediumCount;
+                    const remainingHigh = highNumbers.length - adjustedHighCount;
+                    
+                    // Distribute deficit proportionally to remaining capacity
+                    const totalRemaining = remainingLow + remainingMedium + remainingHigh;
+                    if (totalRemaining > 0) {
+                        const lowDeficit = Math.min(Math.round((remainingLow / totalRemaining) * deficit), remainingLow);
+                        adjustedLowCount += lowDeficit;
+                        deficit -= lowDeficit;
+                        
+                        const mediumDeficit = Math.min(Math.round((remainingMedium / totalRemaining) * deficit), remainingMedium);
+                        adjustedMediumCount += mediumDeficit;
+                        deficit -= mediumDeficit;
+                        
+                        // Assign any remaining deficit to high numbers
+                        adjustedHighCount += deficit;
+                    }
+                    
+                    lowCount = adjustedLowCount;
+                    mediumCount = adjustedMediumCount;
+                    highCount = adjustedHighCount;
+                }
+                
+                // Shuffle each category to get random selection
+                shuffleArray(lowNumbers);
+                shuffleArray(mediumNumbers);
+                shuffleArray(highNumbers);
+                
+                // Select required numbers from each category
+                const selectedLow = lowNumbers.slice(0, lowCount);
+                const selectedMedium = mediumNumbers.slice(0, mediumCount);
+                const selectedHigh = highNumbers.slice(0, highCount);
+                
+                // Combine and sort for final bet
+                return [...selectedLow, ...selectedMedium, ...selectedHigh].sort((a, b) => a - b);
             }
 
             // Function to format a number with leading zero if needed
@@ -313,10 +505,21 @@
                 return num < 10 ? '0' + num : num.toString();
             }
 
+            // Function to get number category class
+            function getNumberCategoryClass(num) {
+                if (num <= 10) return 'number-low';
+                if (num <= 20) return 'number-medium';
+                return 'number-high';
+            }
+
             // Function to generate and display the results
             function generateResults() {
                 const maxNumber = parseInt(document.getElementById('maxNumber').value);
                 const numbersPerBet = parseInt(document.getElementById('numberPerBet').value);
+                const lowRange = parseInt(document.getElementById('lowRange').value);
+                const mediumRange = parseInt(document.getElementById('mediumRange').value);
+                const highRange = parseInt(document.getElementById('highRange').value);
+                
                 const resultsContainer = document.getElementById('bettingResults');
                 const tableBody = document.getElementById('combinationsTableBody');
                 const statisticsContent = document.getElementById('statisticsContent');
@@ -326,9 +529,17 @@
                 tableBody.innerHTML = '';
                 statisticsContent.innerHTML = '';
                 
+                // Reset the bet arrays and counter
+                allGeneratedBets = [];
+                lowBets = [];
+                mediumBets = [];
+                highBets = [];
+                validBetsCount = 0;
+                
                 // Object to count how many combinations generate each number of possibilities
                 const stats = {};
                 let totalCombinations = 0;
+                let lowCount = 0, mediumCount = 0, highCount = 0;
                 
                 digitCombinations.forEach((combination, index) => {
                     const digits = combination.split(',');
@@ -348,18 +559,92 @@
                     `;
                     tableBody.appendChild(row);
 
-                    // Create betting sequence if possible
-                    const bet = generateBettingSequence(possibleNumbers, numbersPerBet);
+                    // Create balanced betting sequence
+                    const bet = generateBalancedBettingSequence(possibleNumbers, numbersPerBet, lowRange, mediumRange, highRange);
                     
                     if (bet) {
+                        validBetsCount++;
+                        
+                        // Count dezenas por categoria
+                        const lowDezenas = bet.filter(num => num <= 10).length;
+                        const mediumDezenas = bet.filter(num => num > 10 && num <= 20).length;
+                        const highDezenas = bet.filter(num => num > 20).length;
+                        
+                        // Categorize the bet based on predominant type
+                        let category;
+                        if (lowDezenas >= mediumDezenas && lowDezenas >= highDezenas) {
+                            category = 'low';
+                            lowCount++;
+                        } else if (mediumDezenas >= lowDezenas && mediumDezenas >= highDezenas) {
+                            category = 'medium';
+                            mediumCount++;
+                        } else {
+                            category = 'high';
+                            highCount++;
+                        }
+                        
+                        // Store the bet in the appropriate array
+                        const betInfo = {
+                            index: index + 1,
+                            combination: combination,
+                            numbers: bet.map(num => formatNumber(num)),
+                            category: category,
+                            possibleCount: count,
+                            distribution: {
+                                low: lowDezenas,
+                                medium: mediumDezenas,
+                                high: highDezenas
+                            }
+                        };
+                        
+                        allGeneratedBets.push(betInfo);
+                        
+                        if (category === 'low') lowBets.push(betInfo);
+                        else if (category === 'medium') mediumBets.push(betInfo);
+                        else if (category === 'high') highBets.push(betInfo);
+                        
+                        // Set category class
+                        let categoryClass = '';
+                        let categoryLabel = '';
+                        
+                        if (category === 'low') {
+                            categoryClass = 'border-l-4 border-green-500';
+                            categoryLabel = 'Baixas';
+                        } else if (category === 'medium') {
+                            categoryClass = 'border-l-4 border-yellow-500';
+                            categoryLabel = 'Médias';
+                        } else if (category === 'high') {
+                            categoryClass = 'border-l-4 border-red-500';
+                            categoryLabel = 'Altas';
+                        }
+                        
                         const card = document.createElement('div');
-                        card.className = 'bg-white dark:bg-gray-800 shadow rounded p-4';
+                        card.className = `bg-white dark:bg-gray-800 shadow rounded p-4 ${categoryClass} bet-card` + 
+                                       ` ${category}-bet`; // Add class for filtering
+                        
+                        let numbersHTML = '';
+                        bet.forEach(num => {
+                            const categoryClass = getNumberCategoryClass(num);
+                            numbersHTML += `<span class="inline-block ${categoryClass} rounded-full px-3 py-1 text-sm font-semibold">${formatNumber(num)}</span>`;
+                        });
+                        
                         card.innerHTML = `
                             <div class="font-semibold text-primary mb-2">Palpite #${index + 1} - Dígitos: ${combination}</div>
                             <div class="flex flex-wrap gap-2 mb-2">
-                                ${bet.map(num => `<span class="inline-block bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-sm font-semibold">${formatNumber(num)}</span>`).join('')}
+                                ${numbersHTML}
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Total de números possíveis: ${count}</div>
+                            <div class="flex justify-between items-center">
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="text-green-600 dark:text-green-400">${lowDezenas} baixas</span> | 
+                                    <span class="text-yellow-600 dark:text-yellow-400">${mediumDezenas} médias</span> | 
+                                    <span class="text-red-600 dark:text-red-400">${highDezenas} altas</span>
+                                </div>
+                                <span class="px-2 py-1 text-xs rounded-full ${
+                                    category === 'low' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 
+                                    category === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 
+                                    'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                                }">${categoryLabel}</span>
+                            </div>
                         `;
                         resultsContainer.appendChild(card);
                     } else {
@@ -367,12 +652,18 @@
                         card.className = 'bg-white dark:bg-gray-800 shadow rounded p-4';
                         card.innerHTML = `
                             <div class="font-semibold text-red-500 mb-2">Palpite #${index + 1} - Dígitos: ${combination}</div>
-                            <div class="text-sm text-red-400">Não há números suficientes para formar um palpite completo.</div>
+                            <div class="text-sm text-red-400">Não há números suficientes para formar um palpite equilibrado.</div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">Total de números possíveis: ${count}</div>
                         `;
                         resultsContainer.appendChild(card);
                     }
                 });
+                
+                // Update counters in the UI
+                document.getElementById('lowCount').textContent = lowCount;
+                document.getElementById('mediumCount').textContent = mediumCount;
+                document.getElementById('highCount').textContent = highCount;
+                document.getElementById('totalBetsCount').textContent = validBetsCount;
                 
                 // Generate statistics summary
                 const sortedCounts = Object.keys(stats).sort((a, b) => parseInt(a) - parseInt(b));
@@ -390,15 +681,199 @@
                 // Add total
                 statisticsTotal.innerHTML = `Total: ${totalCombinations} conjuntos de dígitos analisados`;
                 
+                // Ajusta a altura da tabela de combinações para quando o usuário quiser expandir
+                setTimeout(() => {
+                    tableContainer.style.maxHeight = tableContainer.scrollHeight + 'px';
+                    // Volta a ocultar a tabela
+                    setTimeout(() => {
+                        tableContainer.style.maxHeight = '0px';
+                    }, 100);
+                }, 100);
+            }
+
+            // Função para gerar texto para download
+            function generateDownloadText() {
+                const maxNumber = parseInt(document.getElementById('maxNumber').value);
+                const numbersPerBet = parseInt(document.getElementById('numberPerBet').value);
+                const lowRange = parseInt(document.getElementById('lowRange').value);
+                const mediumRange = parseInt(document.getElementById('mediumRange').value);
+                const highRange = parseInt(document.getElementById('highRange').value);
+                
+                let text = `PALPITES GERADOS - DIA DE SORTE\n`;
+                text += `Números por palpite: ${numbersPerBet} | Número máximo: ${maxNumber}\n`;
+                text += `Distribuição pretendida: ${lowRange} baixas, ${mediumRange} médias, ${highRange} altas\n`;
+                text += `Data de geração: ${new Date().toLocaleDateString()}\n\n`;
+                
+                // Adicionar estatísticas
+                text += `RESUMO DOS PALPITES:\n`;
+                text += `Total de palpites gerados: ${validBetsCount}\n`;
+                text += `Palpites com predominância de dezenas baixas (1-10): ${document.getElementById('lowCount').textContent}\n`;
+                text += `Palpites com predominância de dezenas médias (11-20): ${document.getElementById('mediumCount').textContent}\n`;
+                text += `Palpites com predominância de dezenas altas (21-31): ${document.getElementById('highCount').textContent}\n\n`;
+                
+                // Adicionar palpites por categoria
+                text += `=== PALPITES COM PREDOMINÂNCIA DE DEZENAS BAIXAS (1-10) ===\n\n`;
+                lowBets.forEach(bet => {
+                    text += `Palpite #${bet.index} - Dígitos: ${bet.combination}\n`;
+                    text += `Números: ${bet.numbers.join(' ')}\n`;
+                    text += `Distribuição: ${bet.distribution.low} baixas, ${bet.distribution.medium} médias, ${bet.distribution.high} altas\n\n`;
+                });
+                
+                text += `=== PALPITES COM PREDOMINÂNCIA DE DEZENAS MÉDIAS (11-20) ===\n\n`;
+                mediumBets.forEach(bet => {
+                    text += `Palpite #${bet.index} - Dígitos: ${bet.combination}\n`;
+                    text += `Números: ${bet.numbers.join(' ')}\n`;
+                    text += `Distribuição: ${bet.distribution.low} baixas, ${bet.distribution.medium} médias, ${bet.distribution.high} altas\n\n`;
+                });
+                
+                text += `=== PALPITES COM PREDOMINÂNCIA DE DEZENAS ALTAS (21-31) ===\n\n`;
+                highBets.forEach(bet => {
+                    text += `Palpite #${bet.index} - Dígitos: ${bet.combination}\n`;
+                    text += `Números: ${bet.numbers.join(' ')}\n`;
+                    text += `Distribuição: ${bet.distribution.low} baixas, ${bet.distribution.medium} médias, ${bet.distribution.high} altas\n\n`;
+                });
+                
+                return text;
+            }
+
+            // Função para gerar texto simples para download (apenas os números)
+            function generateSimpleDownloadText() {
+                let text = '';
+                
+                // Apenas os números de cada palpite, separados por espaço
+                allGeneratedBets.forEach(bet => {
+                    text += bet.numbers.join(' ') + '\n';
+                });
+                
+                return text;
+            }
+
+            // Função para download dos palpites detalhados
+            function downloadBets() {
+                if (allGeneratedBets.length === 0) {
+                    alert('Gere os palpites primeiro antes de baixar.');
+                    return;
+                }
+                
+                const textContent = generateDownloadText();
+                const blob = new Blob([textContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                
+                // Criar um link temporário e simular clique
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'palpites_dia_de_sorte.txt';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpar
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+
+            // Função para download dos palpites simplificados (apenas os números)
+            function downloadSimpleBets() {
+                if (allGeneratedBets.length === 0) {
+                    alert('Gere os palpites primeiro antes de baixar.');
+                    return;
+                }
+                
+                const textContent = generateSimpleDownloadText();
+                const blob = new Blob([textContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                
+                // Criar um link temporário e simular clique
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'palpites_simples.txt';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpar
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+
+            // Configurar abas para filtrar os palpites
+            function setupTabs() {
+                const allTab = document.getElementById('allBetsTab');
+                const lowTab = document.getElementById('lowBetsTab');
+                const mediumTab = document.getElementById('mediumBetsTab');
+                const highTab = document.getElementById('highBetsTab');
+                
+                // Função para atualizar a aparência das abas
+                function updateTabAppearance(activeTab) {
+                    // Remover estilos ativos de todas as abas
+                    [allTab, lowTab, mediumTab, highTab].forEach(tab => {
+                        tab.classList.remove('border-b-2', 'border-primary', 'text-primary');
+                        tab.classList.add('text-gray-600', 'dark:text-gray-400');
+                    });
+                    
+                    // Adicionar estilos à aba ativa
+                    activeTab.classList.remove('text-gray-600', 'dark:text-gray-400');
+                    activeTab.classList.add('border-b-2', 'border-primary', 'text-primary');
+                }
+                
+                // Configurar manipuladores de eventos
+                allTab.addEventListener('click', function() {
+                    document.querySelectorAll('.bet-card').forEach(card => {
+                        card.style.display = 'block';
+                    });
+                    updateTabAppearance(allTab);
+                });
+                
+                lowTab.addEventListener('click', function() {
+                    document.querySelectorAll('.bet-card').forEach(card => {
+                        if (card.classList.contains('low-bet')) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    updateTabAppearance(lowTab);
+                });
+                
+                mediumTab.addEventListener('click', function() {
+                    document.querySelectorAll('.bet-card').forEach(card => {
+                        if (card.classList.contains('medium-bet')) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    updateTabAppearance(mediumTab);
+                });
+                
+                highTab.addEventListener('click', function() {
+                    document.querySelectorAll('.bet-card').forEach(card => {
+                        if (card.classList.contains('high-bet')) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    updateTabAppearance(highTab);
+                });
             }
 
             // Add event listener for the generate button
-            document.getElementById('generateBtn').addEventListener('click', generateResults);
+            document.getElementById('generateBtn').addEventListener('click', function() {
+                generateResults();
+                setupTabs();
+            });
             
             // Add event listener for the print button
             document.getElementById('printBtn').addEventListener('click', function() {
                 window.print();
             });
+            
+            // Add event listener for the download buttons
+            document.getElementById('downloadBtn').addEventListener('click', downloadBets);
+            document.getElementById('downloadSimpleBtn').addEventListener('click', downloadSimpleBets);
 
             // Function to extract digits from a number
             function getDigits(num) {
@@ -926,6 +1401,7 @@
 
             // Generate results on page load
             generateResults();
+            setupTabs();
         });
     </script>
     
