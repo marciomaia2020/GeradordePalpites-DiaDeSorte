@@ -306,7 +306,7 @@
             <div class="flex items-center justify-between cursor-pointer mb-2" id="digitCombinationsHeader">
                 <h2 class="text-xl font-semibold flex items-center">
                     <span>Combinações de Dígitos</span> 
-                    <span class="text-sm font-bold ml-2 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full">(126)</span>
+                    <span class="text-sm italic ml-2 text-gray-500 dark:text-gray-400">(126 combinações de dígitos)</span>
                 </h2>
                 <svg class="h-6 w-6 text-gray-500 dark:text-gray-400 toggle-btn" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -454,10 +454,7 @@
                             
                             <!-- Novo painel para combinações não sorteadas -->
                             <div id="undrawnCombinations" class="bg-blue-100 dark:bg-blue-900 p-3 rounded mb-3">
-                                <div class="font-bold text-xl mb-3 text-blue-800 dark:text-blue-200 flex items-center">
-                                    Combinações Ainda Não Sorteadas
-                                    <span class="text-sm font-bold ml-2 bg-blue-200 dark:bg-blue-700 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full" id="undrawnCountDisplay"></span>
-                                </div>
+                                <div class="font-bold text-xl mb-3 text-blue-800 dark:text-blue-200">Combinações Ainda Não Sorteadas</div>
                                 <div id="undrawnCombinationsContent" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                                     <!-- Será preenchido com as combinações não sorteadas -->
                                 </div>
@@ -2007,9 +2004,6 @@
                     digitCombinationCounts[combo] === 0
                 );
                 
-                // Atualizar contador de combinações não sorteadas
-                document.getElementById('undrawnCountDisplay').textContent = undrawnCombinations.length;
-                
                 // Display results
                 const frequencyResults = document.getElementById('frequencyResults');
                 const frequencyTableBody = document.getElementById('frequencyTableBody');
@@ -2029,9 +2023,7 @@
                 const top5Combos = combinationsArray.filter(item => item.count > 0).slice(0, 5);
                 
                 let topCombosHTML = `
-                    <div class="font-bold text-xl mb-3 flex items-center">
-                        Combinações de <span class="mx-1 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-0.5 rounded-full">5</span> Dígitos Mais Frequentes
-                    </div>
+                    <div class="font-bold text-xl mb-3">Combinações de 5 Dígitos Mais Frequentes</div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 `;
                 
@@ -2080,10 +2072,7 @@
                     // Atualizar o texto do cabeçalho
                     const combinationsHeader = document.querySelector('#digitCombinationsHeader h2');
                     if (combinationsHeader) {
-                        combinationsHeader.innerHTML = `
-                            <span>Combinações de Dígitos</span> 
-                            <span class="text-sm font-bold ml-2 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full">(${undrawnCombinations.length})</span>
-                        `;
+                        combinationsHeader.innerHTML = `<span>Combinações de Dígitos</span> <span class="text-sm italic ml-2 text-gray-500 dark:text-gray-400">(${undrawnCombinations.length} combinações não sorteadas)</span>`;
                     }
                     
                     // Limpar quaisquer palpites gerados anteriormente
