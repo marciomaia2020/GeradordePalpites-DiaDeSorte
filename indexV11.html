@@ -326,7 +326,7 @@
                 <div class="space-y-4 bg-gray-100 dark:bg-gray-800 p-4 rounded">
                     <div>
                         <label class="block mb-1">Quantidade de dezenas por palpite:</label>
-                        <input type="number" id="numberPerBet" value="7" min="7" max="15" class="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 text-base">
+                        <input type="number" id="numberPerBet" value="8" min="7" max="15" class="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 text-base">
                     </div>
                     <!-- Campo de número máximo removido, agora é fixo em 31 e oculto -->
                     <input type="hidden" id="maxNumber" value="31">
@@ -335,18 +335,17 @@
                         <div class="flex flex-wrap gap-2">
                             <div class="flex items-center gap-1">
                                 <label for="lowRange" class="whitespace-nowrap">Baixas (1-10):</label>
-                                <input type="number" id="lowRange" value="3" min="0" max="15" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                                <input type="number" id="lowRange" value="3" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
                             </div>
                             <div class="flex items-center gap-1">
                                 <label for="mediumRange" class="whitespace-nowrap">Médias (11-20):</label>
-                                <input type="number" id="mediumRange" value="3" min="0" max="15" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                                <input type="number" id="mediumRange" value="3" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
                             </div>
                             <div class="flex items-center gap-1">
                                 <label for="highRange" class="whitespace-nowrap">Altas (21-31):</label>
-                                <input type="number" id="highRange" value="1" min="0" max="15" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                                <input type="number" id="highRange" value="2" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
                             </div>
                         </div>
-                        <div id="distributionSummary" class="text-sm mt-1 mb-2 text-gray-600 dark:text-gray-400"></div>
                     </div>
                     <div class="flex gap-2">
                         <button id="generateBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
@@ -687,166 +686,13 @@
                 }
             });
             
-            // Função para gerenciar a distribuição por faixa
-            function setupRangeDistribution() {
-                const numberPerBetInput = document.getElementById('numberPerBet');
-                const lowRangeInput = document.getElementById('lowRange');
-                const mediumRangeInput = document.getElementById('mediumRange');
-                const highRangeInput = document.getElementById('highRange');
-                
-                // Variável para armazenar o último campo modificado
-                let lastModified = null;
-                
-                // Função para ajustar os valores mantendo a soma igual ao total
-                function adjustValues(changedInput) {
-                    // Armazenar o último campo alterado
-                    lastModified = changedInput;
-                    
-                    const targetTotal = parseInt(numberPerBetInput.value);
-                    const lowVal = parseInt(lowRangeInput.value) || 0;
-                    const mediumVal = parseInt(mediumRangeInput.value) || 0;
-                    const highVal = parseInt(highRangeInput.value) || 0;
-                    
-                    const currentTotal = lowVal + mediumVal + highVal;
-                    
-                    // Se o total já está correto, não precisa ajustar
-                    if (currentTotal === targetTotal) return;
-                    
-                    // Prioridade de ajuste: manter o valor do último campo alterado
-                    // e distribuir a diferença entre os outros campos
-                    if (changedInput === lowRangeInput) {
-                        // Ajuste proporcional entre médias e altas
-                        const remaining = targetTotal - lowVal;
-                        
-                        if (remaining <= 0) {
-                            // Se não sobrar nada, zera os outros campos
-                            mediumRangeInput.value = 0;
-                            highRangeInput.value = 0;
-                        } else {
-                            // Distribuição proporcional do restante
-                            const mediumRatio = mediumVal / (mediumVal + highVal || 1);
-                            let newMedium = Math.round(remaining * mediumRatio);
-                            
-                            // Garantir que o total seja exato
-                            let newHigh = remaining - newMedium;
-                            
-                            // Aplicar novos valores
-                            mediumRangeInput.value = newMedium;
-                            highRangeInput.value = newHigh;
-                        }
-                    } 
-                    else if (changedInput === mediumRangeInput) {
-                        // Ajuste proporcional entre baixas e altas
-                        const remaining = targetTotal - mediumVal;
-                        
-                        if (remaining <= 0) {
-                            // Se não sobrar nada, zera os outros campos
-                            lowRangeInput.value = 0;
-                            highRangeInput.value = 0;
-                        } else {
-                            // Distribuição proporcional do restante
-                            const lowRatio = lowVal / (lowVal + highVal || 1);
-                            let newLow = Math.round(remaining * lowRatio);
-                            
-                            // Garantir que o total seja exato
-                            let newHigh = remaining - newLow;
-                            
-                            // Aplicar novos valores
-                            lowRangeInput.value = newLow;
-                            highRangeInput.value = newHigh;
-                        }
-                    }
-                    else if (changedInput === highRangeInput) {
-                        // Ajuste proporcional entre baixas e médias
-                        const remaining = targetTotal - highVal;
-                        
-                        if (remaining <= 0) {
-                            // Se não sobrar nada, zera os outros campos
-                            lowRangeInput.value = 0;
-                            mediumRangeInput.value = 0;
-                        } else {
-                            // Distribuição proporcional do restante
-                            const lowRatio = lowVal / (lowVal + mediumVal || 1);
-                            let newLow = Math.round(remaining * lowRatio);
-                            
-                            // Garantir que o total seja exato
-                            let newMedium = remaining - newLow;
-                            
-                            // Aplicar novos valores
-                            lowRangeInput.value = newLow;
-                            mediumRangeInput.value = newMedium;
-                        }
-                    }
-                    else if (changedInput === numberPerBetInput) {
-                        // Se mudar o número total de dezenas, ajustar proporcionalmente
-                        const ratio = targetTotal / (currentTotal || 1);
-                        
-                        // Manter pelo menos 1 dezena em cada categoria se possível
-                        if (targetTotal >= 3) {
-                            // Distribuição proporcional
-                            let newLow = Math.round(lowVal * ratio);
-                            let newMedium = Math.round(mediumVal * ratio);
-                            let newHigh = targetTotal - (newLow + newMedium);
-                            
-                            // Garantir que todos os valores sejam não negativos
-                            newLow = Math.max(0, newLow);
-                            newMedium = Math.max(0, newMedium);
-                            newHigh = Math.max(0, newHigh);
-                            
-                            // Aplicar novos valores
-                            lowRangeInput.value = newLow;
-                            mediumRangeInput.value = newMedium;
-                            highRangeInput.value = newHigh;
-                        } else {
-                            // Para números pequenos, distribua simplesmente
-                            lowRangeInput.value = Math.min(targetTotal, lowVal || 1);
-                            mediumRangeInput.value = Math.min(targetTotal - parseInt(lowRangeInput.value), mediumVal || 0);
-                            highRangeInput.value = targetTotal - parseInt(lowRangeInput.value) - parseInt(mediumRangeInput.value);
-                        }
-                    }
-                    
-                    // Garantir que nenhum valor seja negativo
-                    if (parseInt(lowRangeInput.value) < 0) lowRangeInput.value = 0;
-                    if (parseInt(mediumRangeInput.value) < 0) mediumRangeInput.value = 0;
-                    if (parseInt(highRangeInput.value) < 0) highRangeInput.value = 0;
-                    
-                    // Atualizar a descrição na interface para mostrar a soma atual
-                    updateDistributionSummary();
-                }
-                
-                // Função para mostrar um resumo da distribuição atual
-                function updateDistributionSummary() {
-                    const totalDezenas = parseInt(numberPerBetInput.value);
-                    const lowVal = parseInt(lowRangeInput.value) || 0;
-                    const mediumVal = parseInt(mediumRangeInput.value) || 0;
-                    const highVal = parseInt(highRangeInput.value) || 0;
-                    
-                    const distributionSummary = document.getElementById('distributionSummary');
-                    if (distributionSummary) {
-                        distributionSummary.textContent = `Total: ${lowVal + mediumVal + highVal}/${totalDezenas} dezenas`;
-                        
-                        // Destacar se a soma não estiver correta (não deve acontecer com o auto-ajuste)
-                        if (lowVal + mediumVal + highVal !== totalDezenas) {
-                            distributionSummary.classList.add('text-red-500');
-                        } else {
-                            distributionSummary.classList.remove('text-red-500');
-                        }
-                    }
-                }
-                
-                // Adicionar event listeners
-                lowRangeInput.addEventListener('change', () => adjustValues(lowRangeInput));
-                mediumRangeInput.addEventListener('change', () => adjustValues(mediumRangeInput));
-                highRangeInput.addEventListener('change', () => adjustValues(highRangeInput));
-                numberPerBetInput.addEventListener('change', () => adjustValues(numberPerBetInput));
-                
-                // Também ajustar quando o usuário digita
-                lowRangeInput.addEventListener('input', () => adjustValues(lowRangeInput));
-                mediumRangeInput.addEventListener('input', () => adjustValues(mediumRangeInput));
-                highRangeInput.addEventListener('input', () => adjustValues(highRangeInput));
-                
-                // Inicializar o resumo da distribuição
-                updateDistributionSummary();
+            // Show modal immediately on first visit
+            if (!localStorage.getItem('instructionsShown')) {
+                setTimeout(() => {
+                    modal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                    localStorage.setItem('instructionsShown', 'true');
+                }, 500);
             }
             
             // Configurações das APIs
@@ -2489,9 +2335,6 @@
             // Add event listener for fetching results
             document.getElementById('fetchResultsBtn').addEventListener('click', fetchResultsFromAPIs);
 
-            // Configurar a distribuição por faixa
-            setupRangeDistribution();
-            
             // Generate results on page load
             generateResults();
             setupTabs();

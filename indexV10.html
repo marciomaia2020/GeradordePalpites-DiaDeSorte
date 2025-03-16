@@ -144,14 +144,49 @@
             font-weight: bold;
         }
         
-        /* Animação para as barras de estatística */
-        @keyframes barGrow {
-            from { height: 0%; }
-            to { height: var(--target-height); }
+        /* Estilos para gráfico de barras */
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            height: 150px;
+            width: 100%;
+            gap: 10px;
         }
         
-        .stat-bar-group .stat-bar {
-            animation: barGrow 1s ease-out forwards;
+        .bar {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .bar-value {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .bar-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .bar-percentage {
+            font-size: 12px;
+            position: absolute;
+            bottom: -20px;
+            color: #64748b;
+        }
+        
+        .dark .bar-percentage {
+            color: #94a3b8;
         }
     </style>
 </head>
@@ -326,7 +361,7 @@
                 <div class="space-y-4 bg-gray-100 dark:bg-gray-800 p-4 rounded">
                     <div>
                         <label class="block mb-1">Quantidade de dezenas por palpite:</label>
-                        <input type="number" id="numberPerBet" value="7" min="7" max="15" class="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 text-base">
+                        <input type="number" id="numberPerBet" value="8" min="7" max="15" class="p-2 border rounded w-full dark:bg-gray-700 dark:border-gray-600 text-base">
                     </div>
                     <!-- Campo de número máximo removido, agora é fixo em 31 e oculto -->
                     <input type="hidden" id="maxNumber" value="31">
@@ -335,18 +370,17 @@
                         <div class="flex flex-wrap gap-2">
                             <div class="flex items-center gap-1">
                                 <label for="lowRange" class="whitespace-nowrap">Baixas (1-10):</label>
-                                <input type="number" id="lowRange" value="3" min="0" max="15" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                                <input type="number" id="lowRange" value="3" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
                             </div>
                             <div class="flex items-center gap-1">
                                 <label for="mediumRange" class="whitespace-nowrap">Médias (11-20):</label>
-                                <input type="number" id="mediumRange" value="3" min="0" max="15" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                                <input type="number" id="mediumRange" value="3" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
                             </div>
                             <div class="flex items-center gap-1">
                                 <label for="highRange" class="whitespace-nowrap">Altas (21-31):</label>
-                                <input type="number" id="highRange" value="1" min="0" max="15" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
+                                <input type="number" id="highRange" value="2" min="1" max="7" class="p-2 border rounded w-14 dark:bg-gray-700 dark:border-gray-600 text-base">
                             </div>
                         </div>
-                        <div id="distributionSummary" class="text-sm mt-1 mb-2 text-gray-600 dark:text-gray-400"></div>
                     </div>
                     <div class="flex gap-2">
                         <button id="generateBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
@@ -413,37 +447,28 @@
                             </div>
                             
                             <!-- NOVA SEÇÃO: Estatística de dezenas por categoria -->
-                            <div id="numberCategoryStats" class="bg-indigo-900 p-3 rounded mb-3 text-center">
-                                <div class="font-bold text-xl mb-3 text-white">Estatística de Dezenas nos Sorteios Anteriores</div>
-                                <div class="stat-bars-container flex justify-center items-end h-20 mb-1 gap-4">
-                                    <div class="stat-bar-group flex flex-col items-center">
-                                        <div id="lowBar" class="bg-green-500 w-32 text-white font-bold flex justify-center items-center" style="height: 0%">57%</div>
-                                        <div class="text-sm text-white mt-1">4 dezenas<br>baixas</div>
-                                    </div>
-                                    <div class="stat-bar-group flex flex-col items-center">
-                                        <div id="mediumBar" class="bg-yellow-600 w-32 text-white font-bold flex justify-center items-center" style="height: 0%">14%</div>
-                                        <div class="text-sm text-white mt-1">1 dezenas<br>Médias</div>
-                                    </div>
-                                    <div class="stat-bar-group flex flex-col items-center">
-                                        <div id="highBar" class="bg-red-600 w-32 text-white font-bold flex justify-center items-center" style="height: 0%">29%</div>
-                                        <div class="text-sm text-white mt-1">2 dezenas<br>Altas</div>
+                            <div id="numberCategoryStats" class="bg-indigo-50 dark:bg-indigo-900 p-3 rounded mb-3">
+                                <div class="font-bold text-xl mb-3 text-indigo-800 dark:text-indigo-200">Estatística de Dezenas nos Sorteios Anteriores</div>
+                                <div class="bar-chart-container mb-4">
+                                    <div id="numberStatsBarChart" class="bar-chart">
+                                        <!-- Será preenchido com as barras do gráfico -->
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 mb-3">
-                                    <div class="bg-green-800 p-3 rounded-lg text-left">
-                                        <div class="font-bold text-white">Baixas (1-10)</div>
-                                        <div id="lowNumberStats" class="text-green-200"></div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                                    <div class="bg-green-100 dark:bg-green-800 p-3 rounded-lg">
+                                        <div class="font-bold text-green-800 dark:text-green-200">Baixas (1-10)</div>
+                                        <div id="lowNumberStats" class="text-green-700 dark:text-green-300"></div>
                                     </div>
-                                    <div class="bg-yellow-700 p-3 rounded-lg text-left">
-                                        <div class="font-bold text-white">Médias (11-20)</div>
-                                        <div id="mediumNumberStats" class="text-yellow-200"></div>
+                                    <div class="bg-yellow-100 dark:bg-yellow-800 p-3 rounded-lg">
+                                        <div class="font-bold text-yellow-800 dark:text-yellow-200">Médias (11-20)</div>
+                                        <div id="mediumNumberStats" class="text-yellow-700 dark:text-yellow-300"></div>
                                     </div>
-                                    <div class="bg-red-800 p-3 rounded-lg text-left">
-                                        <div class="font-bold text-white">Altas (21-31)</div>
-                                        <div id="highNumberStats" class="text-red-200"></div>
+                                    <div class="bg-red-100 dark:bg-red-800 p-3 rounded-lg">
+                                        <div class="font-bold text-red-800 dark:text-red-200">Altas (21-31)</div>
+                                        <div id="highNumberStats" class="text-red-700 dark:text-red-300"></div>
                                     </div>
                                 </div>
-                                <div class="text-sm text-gray-300 italic">
+                                <div class="text-sm text-indigo-700 dark:text-indigo-300 italic">
                                     Esta estatística mostra a frequência de cada categoria de dezenas nos sorteios analisados.
                                     Use-a para ajustar sua estratégia de distribuição.
                                 </div>
@@ -687,166 +712,13 @@
                 }
             });
             
-            // Função para gerenciar a distribuição por faixa
-            function setupRangeDistribution() {
-                const numberPerBetInput = document.getElementById('numberPerBet');
-                const lowRangeInput = document.getElementById('lowRange');
-                const mediumRangeInput = document.getElementById('mediumRange');
-                const highRangeInput = document.getElementById('highRange');
-                
-                // Variável para armazenar o último campo modificado
-                let lastModified = null;
-                
-                // Função para ajustar os valores mantendo a soma igual ao total
-                function adjustValues(changedInput) {
-                    // Armazenar o último campo alterado
-                    lastModified = changedInput;
-                    
-                    const targetTotal = parseInt(numberPerBetInput.value);
-                    const lowVal = parseInt(lowRangeInput.value) || 0;
-                    const mediumVal = parseInt(mediumRangeInput.value) || 0;
-                    const highVal = parseInt(highRangeInput.value) || 0;
-                    
-                    const currentTotal = lowVal + mediumVal + highVal;
-                    
-                    // Se o total já está correto, não precisa ajustar
-                    if (currentTotal === targetTotal) return;
-                    
-                    // Prioridade de ajuste: manter o valor do último campo alterado
-                    // e distribuir a diferença entre os outros campos
-                    if (changedInput === lowRangeInput) {
-                        // Ajuste proporcional entre médias e altas
-                        const remaining = targetTotal - lowVal;
-                        
-                        if (remaining <= 0) {
-                            // Se não sobrar nada, zera os outros campos
-                            mediumRangeInput.value = 0;
-                            highRangeInput.value = 0;
-                        } else {
-                            // Distribuição proporcional do restante
-                            const mediumRatio = mediumVal / (mediumVal + highVal || 1);
-                            let newMedium = Math.round(remaining * mediumRatio);
-                            
-                            // Garantir que o total seja exato
-                            let newHigh = remaining - newMedium;
-                            
-                            // Aplicar novos valores
-                            mediumRangeInput.value = newMedium;
-                            highRangeInput.value = newHigh;
-                        }
-                    } 
-                    else if (changedInput === mediumRangeInput) {
-                        // Ajuste proporcional entre baixas e altas
-                        const remaining = targetTotal - mediumVal;
-                        
-                        if (remaining <= 0) {
-                            // Se não sobrar nada, zera os outros campos
-                            lowRangeInput.value = 0;
-                            highRangeInput.value = 0;
-                        } else {
-                            // Distribuição proporcional do restante
-                            const lowRatio = lowVal / (lowVal + highVal || 1);
-                            let newLow = Math.round(remaining * lowRatio);
-                            
-                            // Garantir que o total seja exato
-                            let newHigh = remaining - newLow;
-                            
-                            // Aplicar novos valores
-                            lowRangeInput.value = newLow;
-                            highRangeInput.value = newHigh;
-                        }
-                    }
-                    else if (changedInput === highRangeInput) {
-                        // Ajuste proporcional entre baixas e médias
-                        const remaining = targetTotal - highVal;
-                        
-                        if (remaining <= 0) {
-                            // Se não sobrar nada, zera os outros campos
-                            lowRangeInput.value = 0;
-                            mediumRangeInput.value = 0;
-                        } else {
-                            // Distribuição proporcional do restante
-                            const lowRatio = lowVal / (lowVal + mediumVal || 1);
-                            let newLow = Math.round(remaining * lowRatio);
-                            
-                            // Garantir que o total seja exato
-                            let newMedium = remaining - newLow;
-                            
-                            // Aplicar novos valores
-                            lowRangeInput.value = newLow;
-                            mediumRangeInput.value = newMedium;
-                        }
-                    }
-                    else if (changedInput === numberPerBetInput) {
-                        // Se mudar o número total de dezenas, ajustar proporcionalmente
-                        const ratio = targetTotal / (currentTotal || 1);
-                        
-                        // Manter pelo menos 1 dezena em cada categoria se possível
-                        if (targetTotal >= 3) {
-                            // Distribuição proporcional
-                            let newLow = Math.round(lowVal * ratio);
-                            let newMedium = Math.round(mediumVal * ratio);
-                            let newHigh = targetTotal - (newLow + newMedium);
-                            
-                            // Garantir que todos os valores sejam não negativos
-                            newLow = Math.max(0, newLow);
-                            newMedium = Math.max(0, newMedium);
-                            newHigh = Math.max(0, newHigh);
-                            
-                            // Aplicar novos valores
-                            lowRangeInput.value = newLow;
-                            mediumRangeInput.value = newMedium;
-                            highRangeInput.value = newHigh;
-                        } else {
-                            // Para números pequenos, distribua simplesmente
-                            lowRangeInput.value = Math.min(targetTotal, lowVal || 1);
-                            mediumRangeInput.value = Math.min(targetTotal - parseInt(lowRangeInput.value), mediumVal || 0);
-                            highRangeInput.value = targetTotal - parseInt(lowRangeInput.value) - parseInt(mediumRangeInput.value);
-                        }
-                    }
-                    
-                    // Garantir que nenhum valor seja negativo
-                    if (parseInt(lowRangeInput.value) < 0) lowRangeInput.value = 0;
-                    if (parseInt(mediumRangeInput.value) < 0) mediumRangeInput.value = 0;
-                    if (parseInt(highRangeInput.value) < 0) highRangeInput.value = 0;
-                    
-                    // Atualizar a descrição na interface para mostrar a soma atual
-                    updateDistributionSummary();
-                }
-                
-                // Função para mostrar um resumo da distribuição atual
-                function updateDistributionSummary() {
-                    const totalDezenas = parseInt(numberPerBetInput.value);
-                    const lowVal = parseInt(lowRangeInput.value) || 0;
-                    const mediumVal = parseInt(mediumRangeInput.value) || 0;
-                    const highVal = parseInt(highRangeInput.value) || 0;
-                    
-                    const distributionSummary = document.getElementById('distributionSummary');
-                    if (distributionSummary) {
-                        distributionSummary.textContent = `Total: ${lowVal + mediumVal + highVal}/${totalDezenas} dezenas`;
-                        
-                        // Destacar se a soma não estiver correta (não deve acontecer com o auto-ajuste)
-                        if (lowVal + mediumVal + highVal !== totalDezenas) {
-                            distributionSummary.classList.add('text-red-500');
-                        } else {
-                            distributionSummary.classList.remove('text-red-500');
-                        }
-                    }
-                }
-                
-                // Adicionar event listeners
-                lowRangeInput.addEventListener('change', () => adjustValues(lowRangeInput));
-                mediumRangeInput.addEventListener('change', () => adjustValues(mediumRangeInput));
-                highRangeInput.addEventListener('change', () => adjustValues(highRangeInput));
-                numberPerBetInput.addEventListener('change', () => adjustValues(numberPerBetInput));
-                
-                // Também ajustar quando o usuário digita
-                lowRangeInput.addEventListener('input', () => adjustValues(lowRangeInput));
-                mediumRangeInput.addEventListener('input', () => adjustValues(mediumRangeInput));
-                highRangeInput.addEventListener('input', () => adjustValues(highRangeInput));
-                
-                // Inicializar o resumo da distribuição
-                updateDistributionSummary();
+            // Show modal immediately on first visit
+            if (!localStorage.getItem('instructionsShown')) {
+                setTimeout(() => {
+                    modal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                    localStorage.setItem('instructionsShown', 'true');
+                }, 500);
             }
             
             // Configurações das APIs
@@ -1759,27 +1631,48 @@
                 numberCategoryStats.medium.percentage = (numberCategoryStats.medium.count / total) * 100;
                 numberCategoryStats.high.percentage = (numberCategoryStats.high.count / total) * 100;
                 
-                // Renderizar as barras diretamente
-                const lowBar = document.getElementById('lowBar');
-                const mediumBar = document.getElementById('mediumBar');
-                const highBar = document.getElementById('highBar');
+                // Renderiza o gráfico
+                const barChart = document.getElementById('numberStatsBarChart');
+                barChart.innerHTML = '';
                 
-                if (lowBar && mediumBar && highBar) {
-                    // Definir as alturas e textos das barras
-                    lowBar.style.height = `${Math.max(10, numberCategoryStats.low.percentage)}%`;
-                    lowBar.textContent = `${Math.round(numberCategoryStats.low.percentage)}%`;
-                    
-                    mediumBar.style.height = `${Math.max(10, numberCategoryStats.medium.percentage)}%`;
-                    mediumBar.textContent = `${Math.round(numberCategoryStats.medium.percentage)}%`;
-                    
-                    highBar.style.height = `${Math.max(10, numberCategoryStats.high.percentage)}%`;
-                    highBar.textContent = `${Math.round(numberCategoryStats.high.percentage)}%`;
-                    
-                    // Atualizar rótulos abaixo das barras
-                    lowBar.nextElementSibling.innerHTML = `${numberCategoryStats.low.count} dezenas<br>baixas`;
-                    mediumBar.nextElementSibling.innerHTML = `${numberCategoryStats.medium.count} dezenas<br>Médias`;
-                    highBar.nextElementSibling.innerHTML = `${numberCategoryStats.high.count} dezenas<br>Altas`;
-                }
+                // Barra baixas (1-10)
+                const lowBar = document.createElement('div');
+                lowBar.className = 'bar';
+                const lowHeight = Math.max(5, Math.min(100, numberCategoryStats.low.percentage));
+                lowBar.innerHTML = `
+                    <div class="bar-value bg-green-500 dark:bg-green-600" style="height: ${lowHeight}%">
+                        ${Math.round(numberCategoryStats.low.percentage)}%
+                        <span class="bar-percentage">${numberCategoryStats.low.count} dezenas</span>
+                    </div>
+                    <div class="bar-label text-green-700 dark:text-green-400">Baixas</div>
+                `;
+                barChart.appendChild(lowBar);
+                
+                // Barra médias (11-20)
+                const mediumBar = document.createElement('div');
+                mediumBar.className = 'bar';
+                const mediumHeight = Math.max(5, Math.min(100, numberCategoryStats.medium.percentage));
+                mediumBar.innerHTML = `
+                    <div class="bar-value bg-yellow-500 dark:bg-yellow-600" style="height: ${mediumHeight}%">
+                        ${Math.round(numberCategoryStats.medium.percentage)}%
+                        <span class="bar-percentage">${numberCategoryStats.medium.count} dezenas</span>
+                    </div>
+                    <div class="bar-label text-yellow-700 dark:text-yellow-400">Médias</div>
+                `;
+                barChart.appendChild(mediumBar);
+                
+                // Barra altas (21-31)
+                const highBar = document.createElement('div');
+                highBar.className = 'bar';
+                const highHeight = Math.max(5, Math.min(100, numberCategoryStats.high.percentage));
+                highBar.innerHTML = `
+                    <div class="bar-value bg-red-500 dark:bg-red-600" style="height: ${highHeight}%">
+                        ${Math.round(numberCategoryStats.high.percentage)}%
+                        <span class="bar-percentage">${numberCategoryStats.high.count} dezenas</span>
+                    </div>
+                    <div class="bar-label text-red-700 dark:text-red-400">Altas</div>
+                `;
+                barChart.appendChild(highBar);
                 
                 // Atualiza os detalhes numéricos
                 document.getElementById('lowNumberStats').innerHTML = `
@@ -2489,9 +2382,6 @@
             // Add event listener for fetching results
             document.getElementById('fetchResultsBtn').addEventListener('click', fetchResultsFromAPIs);
 
-            // Configurar a distribuição por faixa
-            setupRangeDistribution();
-            
             // Generate results on page load
             generateResults();
             setupTabs();
