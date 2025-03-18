@@ -1,0 +1,12 @@
+a Tabela de Combinações deve condizer com a seleção que for feita aqui..
+
+
+Quantidade de dígitos para combinação:
+Estatísticas de combinações:
+Combinações com 1 dígito(s)
+
+Total de combinações: 10
+
+Combinações de dígitos:
+
+ou seja conforme o usuario seleciona a quantidade de digitos.. o sistema.. gera a tabela de combinações.. (possivel é claro.)
