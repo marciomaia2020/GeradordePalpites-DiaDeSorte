@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela de Combinações Válidas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            color: #333;
+        }
+        .table-container {
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            overflow-x: auto;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+            }
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Tabela de Combinações Válidas</h2>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Modalidade</th>
+                    <th>Intervalo de Números</th>
+                    <th>Qtd. Total de Combinações</th>
+                    <th>Qtd. de Combinações Válidas</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-combinacoes">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const combinacoesLoterias = [
+            { nome: "Dia de Sorte", intervalo: "01-31", total: 252, validas: 126 },
+            { nome: "Lotofácil", intervalo: "01-25", total: 252, validas: 252 },
+            { nome: "Super 7", intervalo: "01-70", total: 252, validas: 252 },
+            { nome: "Lotomania", intervalo: "01-100", total: 252, validas: 252 },
+            { nome: "Dupla Sena", intervalo: "01-50", total: 252, validas: 252 },
+            { nome: "Quina", intervalo: "01-80", total: 252, validas: 252 },
+            { nome: "Timemania", intervalo: "01-80", total: 252, validas: 252 },
+            { nome: "Mega-Sena", intervalo: "01-60", total: 252, validas: 252 }
+        ];
+
+        const tabelaCombinacoes = document.getElementById("tabela-combinacoes");
+
+        combinacoesLoterias.forEach(loteria => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${loteria.nome}</td>
+                <td>${loteria.intervalo}</td>
+                <td>${loteria.total}</td>
+                <td>${loteria.validas}</td>
+            `;
+            tabelaCombinacoes.appendChild(row);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabela de Combinações Válidas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            color: #333;
+        }
+        .table-container {
+            width: 95%;
+            max-width: 1000px;
+            margin: auto;
+            overflow-x: auto;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        @media (max-width: 600px) {
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Tabela de Combinações Válidas por Modalidade</h2>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Modalidade</th>
+                    <th>Intervalo de Números</th>
+                    <th>1 Dígito</th>
+                    <th>2 Dígitos</th>
+                    <th>3 Dígitos</th>
+                    <th>4 Dígitos</th>
+                    <th>5 Dígitos</th>
+                    <th>6 Dígitos</th>
+                    <th>7 Dígitos</th>
+                    <th>8 Dígitos</th>
+                    <th>9 Dígitos</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-combinacoes">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const modalidades = [
+            { nome: "Dia de Sorte", intervalo: 31 },
+            { nome: "Lotofácil", intervalo: 25 },
+            { nome: "Super 7", intervalo: 70 },
+            { nome: "Lotomania", intervalo: 100 },
+            { nome: "Dupla Sena", intervalo: 50 },
+            { nome: "Quina", intervalo: 80 },
+            { nome: "Timemania", intervalo: 80 },
+            { nome: "Mega-Sena", intervalo: 60 }
+        ];
+
+        function calcularCombinacoes(digitos, intervalo) {
+            let min = Math.pow(10, digitos - 1); // Menor número com X dígitos
+            let max = Math.pow(10, digitos) - 1; // Maior número com X dígitos
+            let validos = 0;
+
+            for (let i = min; i <= max; i++) {
+                if (i <= intervalo) {
+                    validos++;
+                }
+            }
+            return validos;
+        }
+
+        const tabelaCombinacoes = document.getElementById("tabela-combinacoes");
+
+        modalidades.forEach(modalidade => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${modalidade.nome}</td>
+                <td>01-${modalidade.intervalo}</td>
+                <td>${calcularCombinacoes(1, modalidade.intervalo)}</td>
+                <td>${calcularCombinacoes(2, modalidade.intervalo)}</td>
+                <td>${calcularCombinacoes(3, modalidade.intervalo)}</td>
+                <td>${calcularCombinacoes(4, modalidade.intervalo)}</td>
+                <td>${calcularCombinacoes(5, modalidade.intervalo)}</td>
+                <td>${calcularCombinacoes(6, modalidade.intervalo)}</td>
+                <td>${calcularCombinacoes(7, modalidade.intervalo)}</td>
+                <td>${calcularCombinacoes(8, modalidade.intervalo)}</td>
+                <td>${calcularCombinacoes(9, modalidade.intervalo)}</td>
+            `;
+            tabelaCombinacoes.appendChild(row);
+        });
+    </script>
+
+</body>
+</html>
