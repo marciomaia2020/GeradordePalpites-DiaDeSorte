@@ -83,6 +83,86 @@
             color: rgb(254, 202, 202);
         }
         
+        /* Estilos para exibição da frequência das dezenas */
+        .frequency-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        
+        .frequency-ball {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            background-color: #f3f4f6;
+            border: 2px solid transparent;
+            color: #1f2937;
+            margin: 0 auto;
+        }
+        
+        .dark .frequency-ball {
+            background-color: #374151;
+            color: #f3f4f6;
+        }
+        
+        .freq-low {
+            border-color: #10b981;
+        }
+        
+        .freq-medium {
+            border-color: #f59e0b;
+        }
+        
+        .freq-high {
+            border-color: #ef4444;
+        }
+        
+        .freq-value {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #4b5563;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Estilos para o mês da sorte */
+        .month-ball {
+            padding: 2px 6px;
+            border-radius: 12px;
+            background-color: #8b5cf6;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        .dark .month-ball {
+            background-color: #7c3aed;
+        }
+        
+        /* Destacar mês mais frequente */
+        .month-highlight {
+            box-shadow: 0 0 0 3px #fbbf24, 0 0 10px #fbbf24;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.7); }
+            70% { box-shadow: 0 0 0 5px rgba(251, 191, 36, 0); }
+            100% { box-shadow: 0 0 0 2px rgba(251, 191, 36, 0); }
+        }
+        
         /* Estilos para o modal popup */
         .modal {
             display: none;
@@ -152,6 +232,21 @@
         
         .stat-bar-group .stat-bar {
             animation: barGrow 1s ease-out forwards;
+        }
+        
+        /* Spinner para carregamento */
+        @keyframes spinner {
+            to {transform: rotate(360deg);}
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            animation: spinner 0.8s linear infinite;
         }
     </style>
 </head>
@@ -292,7 +387,7 @@
 
     <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-center text-primary">Gerador de Palpites - Dia de Sorte</h1>
+            <h1 class="text-3xl font-bold text-center text-primary">Gerador de Palpites - Dia de Sorte <span><a href="index-Selecao-De-Digitos.html">Seleção de  Dígitos</a></span></h1> 
             <button id="showInstructionsBtn" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-2 px-4 rounded flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
@@ -375,8 +470,11 @@
                 <div class="p-4">
                     <div class="mb-4">
                         <label class="block mb-1">Cole os resultados do Dia de Sorte (um por linha, números separados por espaço):</label>
-                        <textarea id="historicalResults" rows="6" placeholder="Ex: 01 03 07 13 18 27 29 
-04 07 09 10 14 20 25" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 text-base"></textarea>
+                        <textarea id="historicalResults" rows="6" placeholder="Ex: 01 03 07 13 18 27 29 Jan
+04 07 09 10 14 20 25 Fev" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 text-base"></textarea>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Formato: "01 02 03 04 05 06 07 Jan" (incluindo o mês da sorte ao final se disponível)
+                        </div>
                     </div>
                     <div class="flex flex-wrap gap-2 mb-4">
                         <button id="analyzeBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
@@ -390,19 +488,18 @@
                                 <option value="brasilapi">API Brasil</option>
                             </select>
                             <select id="modeSelect" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base">
+                                <option value="both">Tentar Todos os Métodos</option>
                                 <option value="direct">Acesso Direto</option>
                                 <option value="proxy">Via Proxy CORS</option>
-                                <option value="both">Tentar Ambos</option>
                             </select>
                         </div>
                         <input type="number" id="concursoNum" placeholder="Nº do concurso (opcional)" min="1" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base w-48">
-                        <button id="fetchResultsBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
-                            <span id="fetchText">Buscar Resultados</span>
-                            <svg id="loadingSpinner" class="animate-spin ml-2 h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </button>
+                        <div class="flex gap-2">
+                            <button id="fetchResultsBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
+                                <span id="fetchText">Buscar Resultados</span>
+                                <span id="loadingSpinner" class="spinner ml-2 hidden"></span>
+                            </button>
+                        </div>
                     </div>
                     <div id="apiStatus" class="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded hidden">
                         <div class="font-semibold mb-1">Status da busca:</div>
@@ -449,6 +546,88 @@
                                 <div class="text-sm text-gray-300 italic">
                                     Esta estatística mostra a frequência de cada categoria de dezenas nos sorteios analisados.
                                     Use-a para ajustar sua estratégia de distribuição.
+                                </div>
+                            </div>
+                            
+                            <!-- NOVA SEÇÃO: Frequência por dezena -->
+                            <div id="numberFrequencyStats" class="bg-purple-900 p-3 rounded mb-3">
+                                <div class="font-bold text-xl mb-3 text-white">Frequência de Cada Dezena</div>
+                                <div id="numberFrequencyGrid" class="frequency-grid gap-3 mb-3">
+                                    <!-- Será preenchido dinamicamente com as dezenas e suas frequências -->
+                                </div>
+                                <div class="text-sm text-gray-300 italic text-center mt-2">
+                                    Esta estatística mostra quantas vezes cada dezena apareceu nos sorteios analisados.
+                                    Os números mais frequentes estão destacados em vermelho.
+                                </div>
+                            </div>
+                            
+                            <!-- NOVA SEÇÃO: Frequência dos meses da sorte -->
+                            <div id="monthFrequencyStats" class="bg-indigo-800 p-3 rounded mb-3">
+                                <div class="font-bold text-xl mb-3 text-white">Frequência do Mês da Sorte</div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                                    <div id="monthJan" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Janeiro</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthFev" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Fevereiro</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthMar" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Março</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthAbr" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Abril</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthMai" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Maio</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthJun" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Junho</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthJul" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Julho</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthAgo" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Agosto</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthSet" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Setembro</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthOut" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Outubro</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthNov" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Novembro</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                    <div id="monthDez" class="bg-indigo-700 rounded p-2 text-center">
+                                        <div class="text-lg font-bold text-white">Dezembro</div>
+                                        <div class="text-2xl text-yellow-300">0</div>
+                                        <div class="text-sm text-indigo-200">0.0%</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-300 italic text-center">
+                                    Estatística dos meses da sorte que mais aparecem nos sorteios anteriores.
                                 </div>
                             </div>
                             
@@ -564,7 +743,10 @@
 
                     <div class="mb-4">
                         <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded">
-                            <div class="font-semibold mb-2">Dezenas possíveis para esta combinação:</div>
+                            <div class="flex items-center mb-2">
+                                <span class="font-semibold mr-2">Dezenas possíveis para esta combinação:</span>
+                                <span id="possibleNumberCount" class="bg-primary text-white px-3 py-1 rounded-full font-bold">0</span>
+                            </div>
                             <div id="possibleNumbersDisplay" class="flex flex-wrap gap-2"></div>
                         </div>
                     </div>
@@ -575,11 +757,17 @@
                             <span id="specificBetCount" class="bg-primary/10 dark:bg-primary/20 text-primary px-2 py-1 rounded-full font-bold">0</span>
                         </div>
                         <div class="flex gap-2">
-                            <button id="downloadSpecificBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button id="downloadSpecificSimpleBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>
-                                Baixar Palpites
+                                Somente Dezenas
+                            </button>
+                            <button id="downloadSpecificBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                                Baixar Detalhado
                             </button>
                         </div>
                     </div>
@@ -923,11 +1111,15 @@
                 HEROKU_URL: 'https://loteriascaixa-api.herokuapp.com/api/dia-de-sorte',
                 BRASIL_URL: 'https://brasilapi.com.br/api/loterias/v1/dia-de-sorte',
                 
-                // Serviços de proxy CORS
+                // Serviços de proxy CORS alternativos - Adicionados mais proxies
                 CORS_PROXY_URLS: [
                     'https://corsproxy.io/?',
                     'https://api.allorigins.win/raw?url=',
-                    'https://cors-anywhere.herokuapp.com/'
+                    'https://cors-anywhere.herokuapp.com/',
+                    'https://proxy.cors.sh/',
+                    'https://cors.bridged.cc/',
+                    'https://crossorigin.me/',
+                    'https://thingproxy.freeboard.io/fetch/'
                 ]
             };
             
@@ -965,8 +1157,71 @@
                 };
             }
             
+            // Modificando a função de seções expansíveis para garantir o funcionamento correto
+            function setupCollapsibleSection(headerId, containerId, initiallyExpanded = false) {
+                const header = document.getElementById(headerId);
+                const container = document.getElementById(containerId);
+                const toggleBtn = header.querySelector('.toggle-btn');
+                
+                // Remover a transição temporariamente para configuração inicial
+                container.style.transition = 'none';
+                
+                // Estado inicial
+                if (!initiallyExpanded) {
+                    container.style.maxHeight = '0px';
+                    container.style.overflow = 'hidden';
+                } else {
+                    container.style.maxHeight = '5000px'; // Valor bem grande para acomodar conteúdo
+                    toggleBtn.classList.add('active');
+                }
+                
+                // Forçar reflow e restaurar transição
+                container.offsetHeight; 
+                container.style.transition = 'max-height 0.5s ease-out';
+                
+                // Adicionar evento de clique
+                header.addEventListener('click', function() {
+                    // Alternar classe active no botão
+                    toggleBtn.classList.toggle('active');
+                    
+                    if (container.style.maxHeight === '0px') {
+                        // Abrir a seção
+                        container.style.maxHeight = '5000px'; // Valor grande suficiente para qualquer conteúdo
+                        
+                        // Log para debug
+                        console.log(`Abrindo ${headerId}`);
+                    } else {
+                        // Fechar a seção
+                        container.style.maxHeight = '0px';
+                        
+                        // Log para debug
+                        console.log(`Fechando ${headerId}`);
+                    }
+                });
+                
+                // Métodos para manipular a seção
+                return {
+                    updateHeight: function() {
+                        if (container.style.maxHeight !== '0px') {
+                            // Redefinir altura para acomodar conteúdo novo
+                            container.style.maxHeight = '5000px';
+                            console.log(`Atualizando altura de ${headerId}`);
+                        }
+                    },
+                    forceOpen: function() {
+                        toggleBtn.classList.add('active');
+                        container.style.maxHeight = '5000px';
+                        console.log(`Forçando abertura de ${headerId}`);
+                    },
+                    forceClose: function() {
+                        toggleBtn.classList.remove('active');
+                        container.style.maxHeight = '0px';
+                        console.log(`Forçando fechamento de ${headerId}`);
+                    }
+                };
+            }
+            
             // Configurar todas as seções expansíveis
-            // Alguns são inicialmente expandidos (true), outros não (false)
             const digitCombinationsSection = setupCollapsibleSection('digitCombinationsHeader', 'digitCombinationsContainer', false);
             const configSection = setupCollapsibleSection('configHeader', 'configContainer', true);
             const frequencySection = setupCollapsibleSection('frequencyHeader', 'frequencyContainer', true);
@@ -974,6 +1229,26 @@
             const statsSection = setupCollapsibleSection('statsHeader', 'statsContainer', false);
             const specificSection = setupCollapsibleSection('specificHeader', 'specificContainer', false);
             const resultsSection = setupCollapsibleSection('resultsHeader', 'resultsContainer', true);
+            
+            // Corrigir o problema das seções que não abrem, forçando a inicialização
+            setTimeout(() => {
+                document.querySelectorAll('.transition-height').forEach(el => {
+                    // Preservar o estado atual
+                    const wasHidden = el.style.maxHeight === '0px';
+                    
+                    // Forçar a recalcular corretamente as alturas
+                    if (wasHidden) {
+                        el.style.maxHeight = 'auto';
+                        const autoHeight = el.scrollHeight + 'px';
+                        el.style.maxHeight = '0px';
+                        
+                        // Armazenar a altura real para uso posterior
+                        el.dataset.fullHeight = autoHeight;
+                    } else {
+                        el.style.maxHeight = el.scrollHeight + 'px';
+                    }
+                });
+            }, 500);
             
             // Armazenamento de cache local para dados das APIs
             const LOCAL_CACHE = {
@@ -1006,6 +1281,16 @@
                     } catch (e) {
                         console.error("Erro ao recuperar cache:", e);
                         return null;
+                    }
+                },
+                
+                removeCache: function(key) {
+                    try {
+                        localStorage.removeItem(key);
+                        return true;
+                    } catch (e) {
+                        console.error("Erro ao remover cache:", e);
+                        return false;
                     }
                 }
             };
@@ -1095,6 +1380,9 @@
             // Variáveis para armazenar combinações não sorteadas
             let undrawnCombinations = [];
             
+            // Variáveis para armazenar combinações sorteadas e suas frequências
+            let drawnCombinations = {};
+            
             // Variáveis para estatísticas de categorias de dezenas
             let numberCategoryStats = {
                 low: { count: 0, percentage: 0 },
@@ -1102,15 +1390,76 @@
                 high: { count: 0, percentage: 0 },
                 total: 0
             };
+            
+            // Variáveis para estatísticas de dezenas individuais
+            let numberFrequency = {};
+            
+            // Variáveis para estatísticas de meses da sorte
+            let monthFrequency = {
+                'Jan': 0, 'Fev': 0, 'Mar': 0, 'Abr': 0, 'Mai': 0, 'Jun': 0,
+                'Jul': 0, 'Ago': 0, 'Set': 0, 'Out': 0, 'Nov': 0, 'Dez': 0
+            };
+            
+            // Mapeamento de abreviação para nome completo do mês
+            const monthNameMap = {
+                'Jan': 'Janeiro',
+                'Fev': 'Fevereiro',
+                'Mar': 'Março',
+                'Abr': 'Abril',
+                'Mai': 'Maio',
+                'Jun': 'Junho',
+                'Jul': 'Julho',
+                'Ago': 'Agosto',
+                'Set': 'Setembro',
+                'Out': 'Outubro',
+                'Nov': 'Novembro',
+                'Dez': 'Dezembro'
+            };
+            
+            // Mapeamento inverso: nome completo para abreviação
+            const monthAbbrevMap = {
+                'Janeiro': 'Jan',
+                'Fevereiro': 'Fev',
+                'Março': 'Mar',
+                'Abril': 'Abr',
+                'Maio': 'Mai',
+                'Junho': 'Jun',
+                'Julho': 'Jul',
+                'Agosto': 'Ago',
+                'Setembro': 'Set',
+                'Outubro': 'Out',
+                'Novembro': 'Nov',
+                'Dezembro': 'Dez'
+            };
+            
+            // Inicializar frequência de números
+            for (let i = 1; i <= 31; i++) {
+                numberFrequency[i] = 0;
+            }
 
             // Preencher o dropdown de combinações específicas
             const specificComboSelect = document.getElementById('specificCombination');
-            validDigitCombinations.forEach((combo, index) => {
-                const option = document.createElement('option');
-                option.value = combo;
-                option.textContent = `#${index + 1}: ${combo}`;
-                specificComboSelect.appendChild(option);
-            });
+            function updateSpecificComboDropdown() {
+                specificComboSelect.innerHTML = '';
+                validDigitCombinations.forEach((combo, index) => {
+                    const option = document.createElement('option');
+                    option.value = combo;
+                    
+                    // Verificar se a combinação já foi sorteada
+                    if (drawnCombinations[combo] && drawnCombinations[combo] > 0) {
+                        option.textContent = `${combo} (${drawnCombinations[combo]} ${drawnCombinations[combo] === 1 ? 'vez' : 'vezes'})`;
+                    } else {
+                        option.textContent = `★ [Não Sorteada] ${combo}`;
+                        option.style.fontWeight = 'bold';
+                        option.style.color = '#1e40af';  // Cor azul mais escura
+                    }
+                    
+                    specificComboSelect.appendChild(option);
+                });
+            }
+            
+            // Chamada inicial
+            updateSpecificComboDropdown();
 
             // Function to generate all possible two-digit numbers from the given digits
             function generateTwoDigitNumbers(digits, maxNumber) {
@@ -1134,6 +1483,48 @@
                     [array[i], array[j]] = [array[j], array[i]];
                 }
                 return array;
+            }
+            
+            // Função para gerar um mês da sorte aleatório
+            function getRandomMonth() {
+                const months = Object.keys(monthAbbrevMap);
+                return months[Math.floor(Math.random() * months.length)];
+            }
+            
+            // Função para pegar o mês da sorte mais frequente (ou aleatório se empate)
+            function getMostFrequentMonth() {
+                // Se não temos dados de frequência, retornar aleatório
+                if (Object.values(monthFrequency).every(v => v === 0)) {
+                    return getRandomMonth();
+                }
+                
+                // Encontrar o mês mais frequente
+                let maxFreq = 0;
+                let mostFrequentMonths = [];
+                
+                for (const [month, freq] of Object.entries(monthFrequency)) {
+                    if (freq > maxFreq) {
+                        maxFreq = freq;
+                        mostFrequentMonths = [month];
+                    } else if (freq === maxFreq) {
+                        mostFrequentMonths.push(month);
+                    }
+                }
+                
+                // Se houver empate, escolher aleatoriamente entre os mais frequentes
+                if (mostFrequentMonths.length > 0) {
+                    const selectedAbbrev = mostFrequentMonths[Math.floor(Math.random() * mostFrequentMonths.length)];
+                    
+                    // Encontrar o nome completo a partir da abreviação
+                    for (const [name, abbrev] of Object.entries(monthAbbrevMap)) {
+                        if (abbrev === selectedAbbrev) {
+                            return name;
+                        }
+                    }
+                }
+                
+                // Fallback para um mês aleatório
+                return getRandomMonth();
             }
 
             // Function to generate a balanced betting sequence with specified distribution
@@ -1300,6 +1691,10 @@
                             highCount++;
                         }
                         
+                        // Gerar um mês da sorte para o palpite
+                        // Usar o mês mais frequente ou aleatório se não houver dados
+                        const luckyMonth = getMostFrequentMonth();
+                        
                         // Store the bet in the appropriate array
                         const betInfo = {
                             index: index + 1,
@@ -1307,6 +1702,7 @@
                             numbers: bet.map(num => formatNumber(num)),
                             category: category,
                             possibleCount: count,
+                            luckyMonth: luckyMonth,
                             distribution: {
                                 low: lowDezenas,
                                 medium: mediumDezenas,
@@ -1345,10 +1741,20 @@
                             numbersHTML += `<span class="inline-block ${categoryClass} rounded-full px-3 py-1 text-sm font-semibold">${formatNumber(num)}</span>`;
                         });
                         
+                        // Adicionar o mês da sorte
+                        const monthAbbrev = monthAbbrevMap[luckyMonth] || 'Jan';
+                        
                         card.innerHTML = `
-                            <div class="font-semibold text-primary mb-2">Palpite #${index + 1} - Dígitos: ${combination}</div>
-                            <div class="flex flex-wrap gap-2 mb-2">
+                            <div class="font-semibold text-primary mb-2 flex justify-between items-center">
+                                <span>Palpite #${index + 1}</span>
+                                <span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                                    ${numbersPerBet} dezenas + mês
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Dígitos: ${combination}</div>
+                            <div class="flex flex-wrap gap-2 mb-3">
                                 ${numbersHTML}
+                                <span class="inline-block month-ball ml-1">${monthAbbrev}</span>
                             </div>
                             <div class="flex justify-between items-center">
                                 <div class="text-xs text-gray-500 dark:text-gray-400">
@@ -1389,7 +1795,7 @@
                     const statItem = document.createElement('div');
                     statItem.className = 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded p-3';
                     statItem.innerHTML = `
-                        <div class="font-semibold">${stats[count]} conjuntos de dígitos geram ${count} números</div>
+                        <div class="font-semibold"><span class="font-bold text-primary">${stats[count]}</span> conjuntos de dígitos geram <span class="font-bold text-primary">${count}</span> números</div>
                         <div class="text-sm mt-1">${stats[count] === 1 ? 'Representa' : 'Representam'} ${((stats[count] / totalCombinations) * 100).toFixed(1)}% do total</div>
                     `;
                     statisticsContent.appendChild(statItem);
@@ -1433,21 +1839,21 @@
                 text += `=== PALPITES COM PREDOMINÂNCIA DE DEZENAS BAIXAS (1-10) ===\n\n`;
                 lowBets.forEach(bet => {
                     text += `Palpite #${bet.index} - Dígitos: ${bet.combination}\n`;
-                    text += `Números: ${bet.numbers.join(' ')}\n`;
+                    text += `Números: ${bet.numbers.join(' ')} ${monthAbbrevMap[bet.luckyMonth]}\n`;
                     text += `Distribuição: ${bet.distribution.low} baixas, ${bet.distribution.medium} médias, ${bet.distribution.high} altas\n\n`;
                 });
                 
                 text += `=== PALPITES COM PREDOMINÂNCIA DE DEZENAS MÉDIAS (11-20) ===\n\n`;
                 mediumBets.forEach(bet => {
                     text += `Palpite #${bet.index} - Dígitos: ${bet.combination}\n`;
-                    text += `Números: ${bet.numbers.join(' ')}\n`;
+                    text += `Números: ${bet.numbers.join(' ')} ${monthAbbrevMap[bet.luckyMonth]}\n`;
                     text += `Distribuição: ${bet.distribution.low} baixas, ${bet.distribution.medium} médias, ${bet.distribution.high} altas\n\n`;
                 });
                 
                 text += `=== PALPITES COM PREDOMINÂNCIA DE DEZENAS ALTAS (21-31) ===\n\n`;
                 highBets.forEach(bet => {
                     text += `Palpite #${bet.index} - Dígitos: ${bet.combination}\n`;
-                    text += `Números: ${bet.numbers.join(' ')}\n`;
+                    text += `Números: ${bet.numbers.join(' ')} ${monthAbbrevMap[bet.luckyMonth]}\n`;
                     text += `Distribuição: ${bet.distribution.low} baixas, ${bet.distribution.medium} médias, ${bet.distribution.high} altas\n\n`;
                 });
                 
@@ -1460,7 +1866,7 @@
                 
                 // Apenas os números de cada palpite, separados por espaço
                 allGeneratedBets.forEach(bet => {
-                    text += bet.numbers.join(' ') + '\n';
+                    text += `${bet.numbers.join(' ')} ${monthAbbrevMap[bet.luckyMonth]}\n`;
                 });
                 
                 return text;
@@ -1604,14 +2010,23 @@
                         numbersHTML += `<span class="inline-block ${categoryClass} rounded-full px-3 py-1 text-sm font-semibold">${num}</span>`;
                     });
                     
+                    // Adicionar o mês da sorte
+                    const monthAbbrev = monthAbbrevMap[bet.luckyMonth] || 'Jan';
+                    
                     const lowCount = bet.numbers.filter(n => parseInt(n) <= 10).length;
                     const mediumCount = bet.numbers.filter(n => parseInt(n) > 10 && parseInt(n) <= 20).length;
                     const highCount = bet.numbers.filter(n => parseInt(n) > 20).length;
                     
                     card.innerHTML = `
-                        <div class="font-semibold text-primary mb-2">Palpite #${i + 1}</div>
-                        <div class="flex flex-wrap gap-2 mb-2">
+                        <div class="font-semibold text-primary mb-2 flex justify-between">
+                            <span>Palpite #${i + 1}</span>
+                            <span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                                ${bet.numbers.length} dezenas + mês
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-3">
                             ${numbersHTML}
+                            <span class="inline-block month-ball ml-1">${monthAbbrev}</span>
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">
                             <span class="text-green-600 dark:text-green-400">${lowCount} baixas</span> | 
@@ -1653,6 +2068,10 @@
                 
                 specificPossibleNumbers = generateTwoDigitNumbers(digits, maxNumber);
                 
+                // Atualizar a contagem de dezenas possíveis
+                const countElement = document.getElementById('possibleNumberCount');
+                countElement.textContent = specificPossibleNumbers.length;
+                
                 // Atualizar a exibição dos números possíveis
                 const display = document.getElementById('possibleNumbersDisplay');
                 display.innerHTML = '';
@@ -1671,6 +2090,7 @@
                 document.getElementById('specificBetCount').textContent = '0';
                 document.getElementById('specificResultsContainer').innerHTML = '';
                 document.getElementById('downloadSpecificBtn').disabled = true;
+                document.getElementById('downloadSpecificSimpleBtn').disabled = true;
                 
                 // Atualizar altura da seção expansível
                 specificSection.updateHeight();
@@ -1681,6 +2101,10 @@
             // Função para gerar palpites para a combinação específica
             function generateSpecificBets() {
                 const numbersPerBet = parseInt(document.getElementById('specificNumberPerBet').value);
+                const selectedCombo = document.getElementById('specificCombination').value;
+                const lowRange = parseInt(document.getElementById('lowRange').value);
+                const mediumRange = parseInt(document.getElementById('mediumRange').value);
+                const highRange = parseInt(document.getElementById('highRange').value);
                 
                 // Verificar se há números suficientes
                 if (specificPossibleNumbers.length < numbersPerBet) {
@@ -1690,13 +2114,40 @@
                 
                 // Calcular todas as combinações possíveis
                 const allCombos = generateCombinations(specificPossibleNumbers, numbersPerBet);
-                specificGeneratedBets = allCombos.map(combo => ({
-                    numbers: combo.map(num => formatNumber(num))
-                }));
                 
-                // Atualizar contador e habilitar botão de download
+                // Gerar palpites balanceados, considerando a distribuição
+                specificGeneratedBets = [];
+                
+                allCombos.forEach(combo => {
+                    // Classificar os números por categoria
+                    const lowCount = combo.filter(num => num <= 10).length;
+                    const mediumCount = combo.filter(num => num > 10 && num <= 20).length;
+                    const highCount = combo.filter(num => num > 20).length;
+                    
+                    // Verificar se a distribuição está próxima da desejada
+                    // Adicionamos uma tolerância para permitir variações
+                    const isBalanced = Math.abs(lowCount - lowRange) <= 2 && 
+                                       Math.abs(mediumCount - mediumRange) <= 2 && 
+                                       Math.abs(highCount - highRange) <= 2;
+                    
+                    specificGeneratedBets.push({
+                        numbers: combo.map(num => formatNumber(num)),
+                        luckyMonth: getMostFrequentMonth(), // Adicionar mês da sorte
+                        isBalanced: isBalanced
+                    });
+                });
+                
+                // Ordenar para que os palpites balanceados apareçam primeiro
+                specificGeneratedBets.sort((a, b) => {
+                    if (a.isBalanced && !b.isBalanced) return -1;
+                    if (!a.isBalanced && b.isBalanced) return 1;
+                    return 0;
+                });
+                
+                // Atualizar contador e habilitar botões de download
                 document.getElementById('specificBetCount').textContent = specificGeneratedBets.length;
                 document.getElementById('downloadSpecificBtn').disabled = false;
+                document.getElementById('downloadSpecificSimpleBtn').disabled = false;
                 
                 // Configurar paginação e mostrar resultados
                 currentPage = 1;
@@ -1722,13 +2173,27 @@
                 
                 // Adicionar cada palpite
                 specificGeneratedBets.forEach((bet, index) => {
-                    text += `Palpite #${index + 1}: ${bet.numbers.join(' ')}\n`;
+                    text += `Palpite #${index + 1}: ${bet.numbers.join(' ')} ${monthAbbrevMap[bet.luckyMonth]}\n`;
+                });
+                
+                return text;
+            }
+            
+            // Função para gerar texto simples de download dos palpites específicos
+            function generateSpecificSimpleDownloadText() {
+                if (specificGeneratedBets.length === 0) return '';
+                
+                let text = '';
+                
+                // Adicionar cada palpite, apenas números e mês
+                specificGeneratedBets.forEach(bet => {
+                    text += `${bet.numbers.join(' ')} ${monthAbbrevMap[bet.luckyMonth]}\n`;
                 });
                 
                 return text;
             }
 
-            // Função para download dos palpites específicos
+            // Função para download dos palpites específicos detalhados
             function downloadSpecificBets() {
                 if (specificGeneratedBets.length === 0) {
                     alert('Nenhum palpite foi gerado para download.');
@@ -1743,6 +2208,31 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = 'palpites_específicos.txt';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpar
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // Função para download dos palpites específicos simplificados
+            function downloadSpecificSimpleBets() {
+                if (specificGeneratedBets.length === 0) {
+                    alert('Nenhum palpite foi gerado para download.');
+                    return;
+                }
+                
+                const textContent = generateSpecificSimpleDownloadText();
+                const blob = new Blob([textContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                
+                // Criar um link temporário e simular clique
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'palpites_específicos_simples.txt';
                 document.body.appendChild(a);
                 a.click();
                 
@@ -1773,12 +2263,24 @@
                     activeTab.classList.add('border-b-2', 'border-primary', 'text-primary');
                 }
                 
+                // Função para forçar a atualização da altura da seção de resultados
+                function forceUpdateHeight() {
+                    console.log("Forçando atualização da altura da seção de resultados");
+                    setTimeout(() => {
+                        const resultsContainer = document.getElementById('resultsContainer');
+                        if (resultsContainer && resultsContainer.style.maxHeight !== '0px') {
+                            resultsContainer.style.maxHeight = '5000px';
+                        }
+                    }, 50);
+                }
+                
                 // Configurar manipuladores de eventos
                 allTab.addEventListener('click', function() {
                     document.querySelectorAll('.bet-card').forEach(card => {
                         card.style.display = 'block';
                     });
                     updateTabAppearance(allTab);
+                    forceUpdateHeight();
                 });
                 
                 lowTab.addEventListener('click', function() {
@@ -1790,6 +2292,7 @@
                         }
                     });
                     updateTabAppearance(lowTab);
+                    forceUpdateHeight();
                 });
                 
                 mediumTab.addEventListener('click', function() {
@@ -1801,6 +2304,7 @@
                         }
                     });
                     updateTabAppearance(mediumTab);
+                    forceUpdateHeight();
                 });
                 
                 highTab.addEventListener('click', function() {
@@ -1812,6 +2316,7 @@
                         }
                     });
                     updateTabAppearance(highTab);
+                    forceUpdateHeight();
                 });
             }
             
@@ -1865,51 +2370,115 @@
                 // Exibir seção de estatísticas
                 document.getElementById('numberCategoryStats').style.display = 'block';
             }
-
-            // Add event listener for the generate button
-            document.getElementById('generateBtn').addEventListener('click', function() {
-                generateResults();
-                setupTabs();
-            });
             
-            // Add event listener for the print button
-            document.getElementById('printBtn').addEventListener('click', function() {
-                window.print();
-            });
-            
-            // Add event listener for the download buttons
-            document.getElementById('downloadBtn').addEventListener('click', downloadBets);
-            document.getElementById('downloadSimpleBtn').addEventListener('click', downloadSimpleBets);
-            document.getElementById('downloadUndrawnBtn').addEventListener('click', downloadUndrawnCombinations);
-
-            // Add event listener for the specific combination select
-            document.getElementById('specificCombination').addEventListener('change', updatePossibleNumbers);
-            
-            // Add event listener for the generate specific button
-            document.getElementById('generateSpecificBtn').addEventListener('click', generateSpecificBets);
-            
-            // Add event listener for the download specific button
-            document.getElementById('downloadSpecificBtn').addEventListener('click', downloadSpecificBets);
-            
-            // Add event listeners for pagination
-            document.getElementById('prevPageBtn').addEventListener('click', function() {
-                if (currentPage > 1) {
-                    currentPage--;
-                    setupPagination();
+            // Função para renderizar as estatísticas de frequência de cada número
+            function renderNumberFrequencyGrid() {
+                const grid = document.getElementById('numberFrequencyGrid');
+                
+                if (!grid) return;
+                
+                grid.innerHTML = '';
+                
+                // Encontrar valor máximo para destacar os mais frequentes
+                const maxFreq = Math.max(...Object.values(numberFrequency));
+                
+                // Gerar uma classe baseada na frequência relativa
+                function getFrequencyClass(freq) {
+                    if (maxFreq === 0) return 'freq-low';
+                    
+                    const relativeFreq = freq / maxFreq;
+                    if (relativeFreq > 0.7) return 'freq-high';
+                    if (relativeFreq > 0.4) return 'freq-medium';
+                    return 'freq-low';
                 }
-            });
-            
-            document.getElementById('nextPageBtn').addEventListener('click', function() {
-                const totalPages = Math.ceil(specificGeneratedBets.length / itemsPerPage);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    setupPagination();
+                
+                // Criar elemento para cada número
+                for (let i = 1; i <= 31; i++) {
+                    const freq = numberFrequency[i] || 0;
+                    const freqClass = getFrequencyClass(freq);
+                    
+                    const ball = document.createElement('div');
+                    ball.className = `frequency-ball ${freqClass}`;
+                    
+                    // Mostrar número
+                    ball.innerHTML = formatNumber(i);
+                    
+                    // Adicionar contador de frequência se > 0
+                    if (freq > 0) {
+                        const freqValue = document.createElement('div');
+                        freqValue.className = 'freq-value';
+                        freqValue.textContent = freq;
+                        ball.appendChild(freqValue);
+                    }
+                    
+                    grid.appendChild(ball);
                 }
-            });
+            }
+            
+            // Função para renderizar as estatísticas de frequência dos meses
+            function renderMonthFrequency() {
+                const totalResults = Object.values(monthFrequency).reduce((sum, freq) => sum + freq, 0);
+                
+                if (totalResults === 0) return; // Não temos dados de mês
+                
+                // Encontrar os meses mais frequentes
+                const maxFreq = Math.max(...Object.values(monthFrequency));
+                
+                // Atualizar cada elemento de mês
+                for (const [abbrev, fullName] of Object.entries(monthNameMap)) {
+                    const freq = monthFrequency[abbrev] || 0;
+                    const percentage = totalResults > 0 ? (freq / totalResults * 100).toFixed(1) : '0.0';
+                    
+                    // ID do elemento do mês (Jan -> monthJan)
+                    const monthEl = document.getElementById(`month${abbrev}`);
+                    if (monthEl) {
+                        // Atualizar o valor e porcentagem
+                        const valueEl = monthEl.querySelector('.text-2xl');
+                        const percentEl = monthEl.querySelector('.text-sm');
+                        
+                        if (valueEl) valueEl.textContent = freq;
+                        if (percentEl) percentEl.textContent = `${percentage}%`;
+                        
+                        // Destacar o mês mais frequente
+                        if (freq === maxFreq && freq > 0) {
+                            monthEl.classList.add('month-highlight');
+                        } else {
+                            monthEl.classList.remove('month-highlight');
+                        }
+                    }
+                }
+            }
 
             // Function to extract digits from a number
             function getDigits(num) {
                 return num.toString().padStart(2, '0').split('').map(Number);
+            }
+
+            // Function to parse a month name or abbreviation 
+            function parseMonth(monthStr) {
+                if (!monthStr) return null;
+                
+                // Normalize the month string (trim, uppercase first letter)
+                const normalizedMonth = monthStr.trim();
+                
+                // Try to match directly with our abbreviations
+                for (const abbrev of Object.keys(monthNameMap)) {
+                    // Match exact abbreviation
+                    if (normalizedMonth.toLowerCase() === abbrev.toLowerCase()) {
+                        return abbrev;
+                    }
+                    
+                    // Match beginning of month name
+                    const fullName = monthNameMap[abbrev];
+                    if (normalizedMonth.toLowerCase() === fullName.toLowerCase() ||
+                        normalizedMonth.toLowerCase().startsWith(fullName.toLowerCase().substring(0, 3)) || 
+                        fullName.toLowerCase().startsWith(normalizedMonth.toLowerCase())) {
+                        return abbrev;
+                    }
+                }
+                
+                // No match found
+                return null;
             }
 
             // Function to analyze the frequency of digit combinations in historical results
@@ -1923,26 +2492,71 @@
                 const results = [];
                 const lines = resultsText.split('\n');
                 
-                // Reset category stats
+                // Reset statistics
                 numberCategoryStats = {
                     low: { count: 0, percentage: 0 },
                     medium: { count: 0, percentage: 0 },
                     high: { count: 0, percentage: 0 },
                     total: 0
                 };
+                
+                // Reset number frequency
+                for (let i = 1; i <= 31; i++) {
+                    numberFrequency[i] = 0;
+                }
+                
+                // Reset month frequency
+                for (const month in monthFrequency) {
+                    monthFrequency[month] = 0;
+                }
 
                 // Parse each line of results
                 for (const line of lines) {
                     if (line.trim() === '') continue;
                     
-                    const numbers = line.trim().split(/\s+/).map(n => parseInt(n.trim()));
-                    if (numbers.length >= 7) { // Ensure there are at least 7 numbers (Dia de Sorte standard)
-                        results.push(numbers);
+                    // Split the line into words
+                    const parts = line.trim().split(/\s+/);
+                    
+                    // Check if the last part might be a month
+                    let numbers = [];
+                    let month = null;
+                    
+                    // If we have at least 7 numbers
+                    if (parts.length >= 7) {
+                        // Try to parse the last item as a month
+                        if (parts.length > 7) {
+                            const lastPart = parts[parts.length - 1];
+                            month = parseMonth(lastPart);
+                            
+                            if (month) {
+                                // If it's a month, exclude it from numbers
+                                numbers = parts.slice(0, -1).map(n => parseInt(n.trim()));
+                            } else {
+                                // No month found, all parts are numbers
+                                numbers = parts.map(n => parseInt(n.trim()));
+                            }
+                        } else {
+                            // Exactly 7 parts, assume all are numbers
+                            numbers = parts.map(n => parseInt(n.trim()));
+                        }
+                        
+                        // Increment month frequency if a month was found
+                        if (month) {
+                            monthFrequency[month]++;
+                        }
+                        
+                        results.push({
+                            numbers: numbers,
+                            month: month
+                        });
                         
                         // Count numbers by category for statistics
                         numbers.forEach(num => {
                             if (num >= 1 && num <= 31) { // Ensure valid numbers only
                                 numberCategoryStats.total++;
+                                
+                                // Increment the frequency for this specific number
+                                numberFrequency[num] = (numberFrequency[num] || 0) + 1;
                                 
                                 if (num <= 10) {
                                     numberCategoryStats.low.count++;
@@ -1963,6 +2577,12 @@
                 
                 // Renderiza o gráfico de estatísticas de categorias
                 renderNumberCategoryChart();
+                
+                // Renderiza a grade de frequência dos números
+                renderNumberFrequencyGrid();
+                
+                // Renderiza a frequência dos meses
+                renderMonthFrequency();
 
                 // Count digit occurrences in each result
                 const digitCombinationCounts = {};
@@ -1976,7 +2596,7 @@
                 results.forEach(result => {
                     // Get all digits from all numbers in this result
                     const allDigits = new Set();
-                    result.forEach(num => {
+                    result.numbers.forEach(num => {
                         getDigits(num).forEach(digit => allDigits.add(digit));
                     });
                     
@@ -1997,6 +2617,9 @@
                     }
                 });
 
+                // Guardar as frequências para uso posterior
+                drawnCombinations = {...digitCombinationCounts};
+                
                 // Convert to array for sorting
                 const combinationsArray = Object.entries(digitCombinationCounts)
                     .map(([combo, count]) => ({ combo, count }))
@@ -2121,38 +2744,13 @@
                 // Atualizar altura da seção de frequência após preenchimento
                 frequencySection.updateHeight();
                 
-                // Atualizar o dropdown para priorizar combinações não sorteadas
-                if (undrawnCombinations.length > 0) {
-                    // Limpar o dropdown
-                    specificComboSelect.innerHTML = '';
-                    
-                    // Adicionar as combinações não sorteadas primeiro com um destaque
-                    undrawnCombinations.forEach((combo, index) => {
-                        const option = document.createElement('option');
-                        option.value = combo;
-                        option.textContent = `★ [Não Sorteada] ${combo}`;
-                        option.style.fontWeight = 'bold';
-                        option.style.color = '#1e40af';  // Cor azul mais escura
-                        specificComboSelect.appendChild(option);
-                    });
-                    
-                    // Adicionar as combinações que já saíram depois
-                    validDigitCombinations.filter(combo => !undrawnCombinations.includes(combo))
-                        .forEach((combo, index) => {
-                            const option = document.createElement('option');
-                            option.value = combo;
-                            option.textContent = `${combo} (${digitCombinationCounts[combo]} vezes)`;
-                            specificComboSelect.appendChild(option);
-                        });
-                    
-                    // Disparar evento change para atualizar a exibição
-                    specificComboSelect.dispatchEvent(new Event('change'));
-                }
+                // Atualizar o dropdown para mostrar as frequências nas combinações
+                updateSpecificComboDropdown();
+                
+                // Disparar evento change para atualizar a exibição
+                specificComboSelect.dispatchEvent(new Event('change'));
             }
 
-            // Add event listener for analyze button
-            document.getElementById('analyzeBtn').addEventListener('click', analyzeFrequency);
-            
             // ======== FUNÇÕES DE ACESSO À API ========
             
             // Função genérica para tentar acessar uma URL via múltiplos proxies CORS
@@ -2248,7 +2846,20 @@
                     console.log("Resposta da API Caixa:", data);
                     
                     if (data && data.listaDezenas && Array.isArray(data.listaDezenas)) {
-                        const allResults = [data.listaDezenas.join(' ')];
+                        let resultLine = data.listaDezenas.join(' ');
+                        
+                        // Adicionar o mês da sorte se disponível
+                        if (data.nomeMesDaSorte) {
+                            // Tenta obter a abreviação correta do mês
+                            for (const [abbrev, name] of Object.entries(monthNameMap)) {
+                                if (name.toLowerCase() === data.nomeMesDaSorte.toLowerCase()) {
+                                    resultLine += ' ' + abbrev;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        const allResults = [resultLine];
                         LOCAL_CACHE.setCached(cacheKey, allResults, 60); // Cache por 60 minutos
                         
                         return {
@@ -2313,7 +2924,21 @@
                     
                     if (data && Array.isArray(data)) {
                         const formattedResults = data.map(contest => {
-                            return contest.dezenas.join(' ');
+                            // Início do resultado com as dezenas
+                            let resultLine = contest.dezenas.join(' ');
+                            
+                            // Adicionar o mês da sorte se disponível
+                            if (contest.mesDaSorte) {
+                                // Tenta obter a abreviação correta do mês
+                                for (const [abbrev, name] of Object.entries(monthNameMap)) {
+                                    if (name.toLowerCase() === contest.mesDaSorte.toLowerCase()) {
+                                        resultLine += ' ' + abbrev;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            return resultLine;
                         }).join('\n');
                         
                         // Armazenar em cache
@@ -2560,17 +3185,54 @@
                     frequencySection.updateHeight();
                 }
             }
+
+            // Add event listener for analyze button
+            document.getElementById('analyzeBtn').addEventListener('click', analyzeFrequency);
             
-            // Add event listener for fetching results
+            // Configurar event listener para botão de busca
             document.getElementById('fetchResultsBtn').addEventListener('click', fetchResultsFromAPIs);
 
             // Configurar a distribuição por faixa
             setupRangeDistribution();
             
-            // Generate results on page load
-            generateResults();
+            // Configurar botão para gerar resultados
+            document.getElementById('generateBtn').addEventListener('click', generateResults);
+
+            // Configurar botão para imprimir resultados
+            document.getElementById('printBtn').addEventListener('click', function() {
+                window.print();
+            });
+            
+            // Configurar download de botões
+            document.getElementById('downloadSimpleBtn').addEventListener('click', downloadSimpleBets);
+            document.getElementById('downloadBtn').addEventListener('click', downloadBets);
+            document.getElementById('downloadUndrawnBtn').addEventListener('click', downloadUndrawnCombinations);
+            document.getElementById('downloadSpecificBtn').addEventListener('click', downloadSpecificBets);
+            document.getElementById('downloadSpecificSimpleBtn').addEventListener('click', downloadSpecificSimpleBets);
+            
+            // Configurar botão para gerar palpites específicos
+            document.getElementById('generateSpecificBtn').addEventListener('click', generateSpecificBets);
+            
+            // Configurar navegação de paginação
+            document.getElementById('prevPageBtn').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    setupPagination();
+                }
+            });
+            
+            document.getElementById('nextPageBtn').addEventListener('click', function() {
+                const totalPages = Math.ceil(specificGeneratedBets.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    setupPagination();
+                }
+            });
+
+            // Inicializar com os dados padrão
+            specificComboSelect.addEventListener('change', updatePossibleNumbers);
+            updatePossibleNumbers();
             setupTabs();
-            updatePossibleNumbers(); // Inicializar a tela de combinação específica
         });
     </script>
     
