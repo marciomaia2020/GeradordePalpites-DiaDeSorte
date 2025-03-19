@@ -1,12 +1,15 @@
-a Tabela de Combinações deve condizer com a seleção que for feita aqui..
+em
+Análise de Frequência de Resultados Anteriores
+ao clicar no botão
+Buscar Resultados
+a app deve buscar os resultados, trazer não apenas um resultado mas todos do primeiro ao ultimo
 
+e tbm quando o usuario inserir... os resultados.. 
+Cole os resultados do Dia de Sorte (um por linha, números separados por espaço):
+e quando clicar no botão analizar Frequencia o app
+deve efetuar o mesmo que quando for clicado em buscar os resultados
 
-Quantidade de dígitos para combinação:
-Estatísticas de combinações:
-Combinações com 1 dígito(s)
+ou seja.. duas operações diferente mas no final a mesma operação 
+ou em outras palavras.. as estatistica deve vir tanto da api como da inserção dos resultados.. ok
 
-Total de combinações: 10
-
-Combinações de dígitos:
-
-ou seja conforme o usuario seleciona a quantidade de digitos.. o sistema.. gera a tabela de combinações.. (possivel é claro.)
+va pode rever isso para mim e no final alem de trazer o arquivo html.. tbm traga um guia para teste..
