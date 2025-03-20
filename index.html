@@ -3853,6 +3853,19 @@
                 specificComboSelect.dispatchEvent(new Event('change'));
             }
 
+            // Função para analisar a frequência com resultados fornecidos diretamente
+            function analyzeFrequencyWithData(resultsData) {
+                // Coloca os dados no campo
+                document.getElementById('historicalResults').value = resultsData;
+                
+                // Executa a análise após garantir que os dados foram inseridos
+                setTimeout(() => {
+                    analyzeFrequency();
+                    // Forçar atualização da interface
+                    frequencySection.updateHeight();
+                }, 200); // Pequeno atraso para garantir que o DOM foi atualizado
+            }
+
             // ======== FUNÇÕES DE ACESSO À API ========
             
             // Função genérica para tentar acessar uma URL via múltiplos proxies CORS
@@ -4131,7 +4144,7 @@
                     };
                 }
             }
-            
+                
             // Função principal para buscar resultados de acordo com as configurações do usuário
             async function fetchResultsFromAPIs() {
                 const spinner = document.getElementById('loadingSpinner');
@@ -4186,8 +4199,8 @@
                             
                             if (result && result.success) {
                                 apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
-                                document.getElementById('historicalResults').value = result.formattedResults;
-                                analyzeFrequency();
+                                // Usar a nova função para analisar com os dados obtidos
+                                analyzeFrequencyWithData(result.formattedResults);
                                 
                                 spinner.classList.add('hidden');
                                 fetchText.textContent = 'Buscar Resultados';
@@ -4215,8 +4228,8 @@
                             
                             if (result && result.success) {
                                 apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
-                                document.getElementById('historicalResults').value = result.formattedResults;
-                                analyzeFrequency();
+                                // Usar a nova função para analisar com os dados obtidos
+                                analyzeFrequencyWithData(result.formattedResults);
                                 
                                 spinner.classList.add('hidden');
                                 fetchText.textContent = 'Buscar Resultados';
@@ -4257,8 +4270,8 @@
                                 
                                 if (result.success) {
                                     apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
-                                    document.getElementById('historicalResults').value = result.formattedResults;
-                                    analyzeFrequency();
+                                    // Usar a nova função para analisar com os dados obtidos
+                                    analyzeFrequencyWithData(result.formattedResults);
                                     
                                     spinner.classList.add('hidden');
                                     fetchText.textContent = 'Buscar Resultados';

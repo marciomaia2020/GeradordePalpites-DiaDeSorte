@@ -1,32 +1,13 @@
-Na seção "Frequência de Cada Dezena (COMO JÁ ESTÁ)
---mantenha o efeito de pulsação para o número mais frequente 
---Volte a exibir as dezenas de 01 a 31 conforme a sua classificação báixa, média e alta
-e não o circulo vermelho para todas as dezenas de 01 a 31 como esta...
-vide imagem anexa...
-
-Na seção "Padrões de Dígitos nos Sorteios"
---Exiba somente os dez Digitos iniciais mais colocados
---Os demais pode ser clicável para mostrar/ocultar (que venha ocultado quando a página for carregada)
---Adicione a opção de gerar palpites baseado neste padrão com a opção de selececionar quantos palpites quiser
-e tbm a oplão de efetuar o downloa tanto detalhado como somente as dezenas + o mes que sempre será o que tiver mais destaque na seção "Frequência do Mês da Sorte"
-
-
-
-
 AJUSTES URGENTES... 
 O sistema efetua a busca dos resultados
 Sucesso! Dados obtidos da API oficial da Caixa (concurso 1040) via proxy.
 mas parece que não está aplicando o resultado da busca nas estatisticas..
 quando clica no botão Buscar Resultados
+a busca em si é efetada selecinando o Acesso direto.. 
+TALVEZ UMA VARIAVEL GLOBAL... 
+FOQUE EM RESOLVER ISSO..... 
 
 
-mas quando inserido manualmente e clica no botão analisar frequenacia sim. esta ok
-so não calcula aqui.. 
-(0) combinações ainda não apareceram em nenhum sorteio (de um total de 108)
-
-
-
-isto para este código..
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -233,6 +214,69 @@ isto para este código..
             background-color: rgba(20, 184, 166, 0.4);
         }
         
+        /* Estilo para botão de mostrar mais padrões */
+        .show-more-btn {
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: #0d9488;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        
+        .show-more-btn:hover {
+            background-color: #0f766e;
+        }
+        
+        .dark .show-more-btn {
+            background-color: #14b8a6;
+        }
+        
+        .dark .show-more-btn:hover {
+            background-color: #0d9488;
+        }
+        
+        /* Estilo para padrões escondidos */
+        .hidden-patterns {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        
+        .hidden-patterns.visible {
+            max-height: 1000px;
+        }
+        
+        /* Estilos para a seleção de padrões */
+        .pattern-selector {
+            padding: 10px;
+            background-color: rgba(13, 148, 136, 0.1);
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+        
+        .pattern-checkbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .pattern-checkbox:hover {
+            background-color: rgba(13, 148, 136, 0.2);
+        }
+        
+        .pattern-checkbox input[type="checkbox"] {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+        }
+        
         @keyframes pulse {
             0% { box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.7); }
             70% { box-shadow: 0 0 0 5px rgba(251, 191, 36, 0); }
@@ -404,6 +448,7 @@ isto para este código..
                                 <li>Na seção "Análise de Frequência", observe os padrões de dígitos iniciais e finais</li>
                                 <li>Veja quais padrões são mais frequentes nos sorteios anteriores</li>
                                 <li>Use o botão "Gerar Palpites baseados nos Padrões" para criar jogos que seguem esses padrões</li>
+                                <li>Selecione padrões específicos e quantidade de palpites desejada</li>
                             </ul>
                         </div>
                         
@@ -731,7 +776,13 @@ isto para este código..
                                     <div class="bg-teal-800 p-3 rounded-lg">
                                         <div class="font-bold text-lg text-white mb-2">Dígitos Iniciais</div>
                                         <div id="startDigitStats" class="space-y-2">
-                                            <!-- Será preenchido dinamicamente -->
+                                            <!-- Mostrar apenas os 10 padrões mais frequentes -->
+                                            <div id="topStartDigitPatterns"></div>
+                                            <!-- Botão para mostrar/ocultar mais padrões -->
+                                            <div id="moreStartDigitPatterns" class="hidden-patterns">
+                                                <!-- Os padrões adicionais serão inseridos aqui -->
+                                            </div>
+                                            <div id="showMoreStartBtn" class="show-more-btn">Mostrar Mais</div>
                                         </div>
                                     </div>
 
@@ -739,7 +790,13 @@ isto para este código..
                                     <div class="bg-teal-800 p-3 rounded-lg">
                                         <div class="font-bold text-lg text-white mb-2">Dígitos Finais</div>
                                         <div id="endDigitStats" class="space-y-2">
-                                            <!-- Será preenchido dinamicamente -->
+                                            <!-- Mostrar apenas os 10 padrões mais frequentes -->
+                                            <div id="topEndDigitPatterns"></div>
+                                            <!-- Botão para mostrar/ocultar mais padrões -->
+                                            <div id="moreEndDigitPatterns" class="hidden-patterns">
+                                                <!-- Os padrões adicionais serão inseridos aqui -->
+                                            </div>
+                                            <div id="showMoreEndBtn" class="show-more-btn">Mostrar Mais</div>
                                         </div>
                                     </div>
                                 </div>
@@ -763,9 +820,48 @@ isto para este código..
                                     </div>
                                 </div>
                                 
+                                <!-- Nova seção para seleção de padrões específicos -->
+                                <div class="bg-teal-800 p-3 rounded-lg mb-3">
+                                    <div class="font-bold text-lg text-white mb-2">Gerar Palpites com Padrões Específicos</div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <div class="text-white mb-2">Selecione os Padrões Iniciais:</div>
+                                            <div id="startPatternSelectors" class="pattern-selector overflow-y-auto max-h-48">
+                                                <!-- Checkboxes serão inseridos aqui -->
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="text-white mb-2">Selecione os Padrões Finais:</div>
+                                            <div id="endPatternSelectors" class="pattern-selector overflow-y-auto max-h-48">
+                                                <!-- Checkboxes serão inseridos aqui -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 mb-4">
+                                        <div class="text-white mb-2">Quantidade de palpites a gerar:</div>
+                                        <input type="number" id="patternBetCount" value="5" min="1" max="20" class="p-2 border rounded w-full bg-teal-700 border-teal-600 text-white">
+                                    </div>
+                                    
+                                    <div class="flex justify-between">
+                                        <button id="generateFromSelectedPatternsBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded">
+                                            Gerar Palpites dos Padrões Selecionados
+                                        </button>
+                                        <div class="flex gap-2">
+                                            <button id="downloadPatternSimpleBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                                                Somente Dezenas
+                                            </button>
+                                            <button id="downloadPatternDetailedBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                                                Baixar Detalhado
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="flex justify-end">
                                     <button id="generateFromPatternBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded">
-                                        Gerar Palpites baseados nos Padrões
+                                        Gerar Palpites baseados nos Padrões Frequentes
                                     </button>
                                 </div>
                                 
@@ -1515,6 +1611,9 @@ isto para este código..
             let endDigitFrequency = {};    // Para dígitos finais
             let patternFrequency = [];     // Para padrões completos
             
+            // Variável para armazenar palpites gerados a partir de padrões selecionados
+            let selectedPatternBets = [];
+            
             // Mapeamento de abreviação para nome completo do mês
             const monthNameMap = {
                 'Jan': 'Janeiro',
@@ -1720,6 +1819,385 @@ isto para este código..
                 
                 // Combine and sort for final bet
                 return [...selectedLow, ...selectedMedium, ...selectedHigh].sort((a, b) => a - b);
+            }
+            
+            // Função para gerar palpites baseados em padrões selecionados pelo usuário
+            function generateBetsFromSelectedPatterns() {
+                // Obter os padrões iniciais selecionados
+                const selectedStartPatterns = [];
+                document.querySelectorAll('#startPatternSelectors input:checked').forEach(checkbox => {
+                    selectedStartPatterns.push(checkbox.value);
+                });
+                
+                // Obter os padrões finais selecionados
+                const selectedEndPatterns = [];
+                document.querySelectorAll('#endPatternSelectors input:checked').forEach(checkbox => {
+                    selectedEndPatterns.push(checkbox.value);
+                });
+                
+                // Verificar se pelo menos um padrão foi selecionado
+                if (selectedStartPatterns.length === 0 && selectedEndPatterns.length === 0) {
+                    alert("Selecione pelo menos um padrão inicial ou final para gerar palpites.");
+                    return;
+                }
+                
+                // Número de palpites a gerar
+                const betCount = parseInt(document.getElementById('patternBetCount').value) || 5;
+                
+                // Limpar palpites anteriores
+                selectedPatternBets = [];
+                
+                // Número de dezenas por palpite e distribuição
+                const numbersPerBet = parseInt(document.getElementById('numberPerBet').value);
+                const lowRange = parseInt(document.getElementById('lowRange').value);
+                const mediumRange = parseInt(document.getElementById('mediumRange').value);
+                const highRange = parseInt(document.getElementById('highRange').value);
+                const maxNumber = 31;
+                
+                // Gerar palpites
+                for (let i = 0; i < betCount; i++) {
+                    // Escolher aleatoriamente um padrão inicial e um final
+                    // (se tiver vários selecionados)
+                    const startPattern = selectedStartPatterns.length > 0 ? 
+                        selectedStartPatterns[Math.floor(Math.random() * selectedStartPatterns.length)] : null;
+                    
+                    const endPattern = selectedEndPatterns.length > 0 ?
+                        selectedEndPatterns[Math.floor(Math.random() * selectedEndPatterns.length)] : null;
+                    
+                    // Gerar números que seguem os padrões
+                    let possibleNumbers = [];
+                    
+                    // Extrair contagens do padrão inicial e final
+                    const startDigitCounts = {};
+                    const endDigitCounts = {};
+                    
+                    if (startPattern) {
+                        startPattern.split(' ').forEach(part => {
+                            if (part.endsWith('n')) {
+                                const count = parseInt(part);
+                                const nextPart = startPattern.split(' ')[startPattern.split(' ').indexOf(part) + 1];
+                                startDigitCounts[nextPart] = (startDigitCounts[nextPart] || 0) + count;
+                            }
+                        });
+                    }
+                    
+                    if (endPattern) {
+                        endPattern.split(' ').forEach(part => {
+                            if (part.endsWith('n')) {
+                                const count = parseInt(part);
+                                const nextPart = endPattern.split(' ')[endPattern.split(' ').indexOf(part) + 1];
+                                endDigitCounts[nextPart] = (endDigitCounts[nextPart] || 0) + count;
+                            }
+                        });
+                    }
+                    
+                    // Se não temos padrões, usar todos os números disponíveis
+                    if (Object.keys(startDigitCounts).length === 0 && Object.keys(endDigitCounts).length === 0) {
+                        possibleNumbers = Array.from({length: maxNumber}, (_, i) => i + 1);
+                    } else {
+                        // Gerar números que seguem os padrões selecionados
+                        for (let num = 1; num <= maxNumber; num++) {
+                            const numStr = num.toString().padStart(2, '0');
+                            const startDigit = numStr[0];
+                            const endDigit = numStr[1];
+                            
+                            // Verificar se o número segue algum dos padrões selecionados
+                            let followsStartPattern = Object.keys(startDigitCounts).length === 0 || 
+                                Object.keys(startDigitCounts).includes(startDigit);
+                            
+                            let followsEndPattern = Object.keys(endDigitCounts).length === 0 || 
+                                Object.keys(endDigitCounts).includes(endDigit);
+                            
+                            if (followsStartPattern && followsEndPattern) {
+                                possibleNumbers.push(num);
+                            }
+                        }
+                    }
+                    
+                    // Garantir que não há duplicatas
+                    possibleNumbers = [...new Set(possibleNumbers)];
+                    
+                    // Verificar se há números suficientes
+                    if (possibleNumbers.length < numbersPerBet) {
+                        // Adicionar números extras aleatórios
+                        const extraNeeded = numbersPerBet - possibleNumbers.length;
+                        const allNumbers = Array.from({length: maxNumber}, (_, i) => i + 1);
+                        const extraNumbers = allNumbers
+                            .filter(num => !possibleNumbers.includes(num))
+                            .sort(() => Math.random() - 0.5)
+                            .slice(0, extraNeeded);
+                        
+                        possibleNumbers = [...possibleNumbers, ...extraNumbers];
+                    }
+                    
+                    // Usar a função de distribuição balanceada
+                    const bet = generateBalancedBettingSequence(possibleNumbers, numbersPerBet, lowRange, mediumRange, highRange);
+                    
+                    if (bet) {
+                        // Contar dezenas por categoria
+                        const lowDezenas = bet.filter(num => num <= 10).length;
+                        const mediumDezenas = bet.filter(num => num > 10 && num <= 20).length;
+                        const highDezenas = bet.filter(num => num > 20).length;
+                        
+                        // Categorizar o palpite baseado no tipo predominante
+                        let category;
+                        if (lowDezenas >= mediumDezenas && lowDezenas >= highDezenas) {
+                            category = 'low';
+                        } else if (mediumDezenas >= lowDezenas && mediumDezenas >= highDezenas) {
+                            category = 'medium';
+                        } else {
+                            category = 'high';
+                        }
+                        
+                        // Gerar um mês da sorte
+                        const luckyMonth = getMostFrequentMonth();
+                        
+                        // Armazenar o palpite
+                        selectedPatternBets.push({
+                            index: i + 1,
+                            numbers: bet.map(num => formatNumber(num)),
+                            category: category,
+                            startPattern: startPattern || "Qualquer",
+                            endPattern: endPattern || "Qualquer",
+                            luckyMonth: luckyMonth,
+                            distribution: {
+                                low: lowDezenas,
+                                medium: mediumDezenas,
+                                high: highDezenas
+                            }
+                        });
+                    }
+                }
+                
+                // Exibir palpites na seção de resultados
+                displaySelectedPatternBets();
+                
+                // Habilitar botões de download
+                document.getElementById('downloadPatternSimpleBtn').disabled = false;
+                document.getElementById('downloadPatternDetailedBtn').disabled = false;
+            }
+            
+            // Função para exibir os palpites gerados a partir de padrões selecionados
+            function displaySelectedPatternBets() {
+                const resultsContainer = document.getElementById('bettingResults');
+                
+                if (!resultsContainer) return;
+                
+                // Limpar resultados anteriores
+                resultsContainer.innerHTML = '';
+                
+                // Atualizar contadores
+                let lowCount = 0, mediumCount = 0, highCount = 0;
+                
+                // Exibir cada palpite
+                selectedPatternBets.forEach(bet => {
+                    // Categorizar e incrementar contador
+                    if (bet.category === 'low') lowCount++;
+                    else if (bet.category === 'medium') mediumCount++;
+                    else if (bet.category === 'high') highCount++;
+                    
+                    // Definir classe da categoria
+                    let categoryClass = '';
+                    let categoryLabel = '';
+                    
+                    if (bet.category === 'low') {
+                        categoryClass = 'border-l-4 border-green-500';
+                        categoryLabel = 'Baixas';
+                    } else if (bet.category === 'medium') {
+                        categoryClass = 'border-l-4 border-yellow-500';
+                        categoryLabel = 'Médias';
+                    } else if (bet.category === 'high') {
+                        categoryClass = 'border-l-4 border-red-500';
+                        categoryLabel = 'Altas';
+                    }
+                    
+                    // Criar card para o palpite
+                    const card = document.createElement('div');
+                    card.className = `bg-white dark:bg-gray-800 shadow rounded p-4 ${categoryClass} bet-card ${bet.category}-bet`;
+                    
+                    // Gerar HTML para os números
+                    let numbersHTML = '';
+                    bet.numbers.forEach(num => {
+                        const parsedNum = parseInt(num);
+                        const categoryClass = getNumberCategoryClass(parsedNum);
+                        numbersHTML += `<span class="inline-block ${categoryClass} rounded-full px-3 py-1 text-sm font-semibold">${num}</span>`;
+                    });
+                    
+                    // Adicionar o mês da sorte
+                    const monthAbbrev = monthAbbrevMap[bet.luckyMonth] || 'Jan';
+                    
+                    // Montar o HTML do card
+                    card.innerHTML = `
+                        <div class="font-semibold text-primary mb-2 flex justify-between items-center">
+                            <span>Palpite #${bet.index}</span>
+                            <span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                                ${bet.numbers.length} dezenas + mês
+                            </span>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                            <span class="bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 px-2 py-1 rounded-full">
+                                Início: ${bet.startPattern}
+                            </span>
+                            <span class="ml-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
+                                Final: ${bet.endPattern}
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            ${numbersHTML}
+                            <span class="inline-block month-ball ml-1">${monthAbbrev}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                <span class="text-green-600 dark:text-green-400">${bet.distribution.low} baixas</span> | 
+                                <span class="text-yellow-600 dark:text-yellow-400">${bet.distribution.medium} médias</span> | 
+                                <span class="text-red-600 dark:text-red-400">${bet.distribution.high} altas</span>
+                            </div>
+                            <span class="px-2 py-1 text-xs rounded-full ${
+                                bet.category === 'low' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 
+                                bet.category === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 
+                                'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                            }">${categoryLabel}</span>
+                        </div>
+                    `;
+                    
+                    resultsContainer.appendChild(card);
+                });
+                
+                // Atualizar contadores na UI
+                document.getElementById('lowCount').textContent = lowCount;
+                document.getElementById('mediumCount').textContent = mediumCount;
+                document.getElementById('highCount').textContent = highCount;
+                document.getElementById('totalBetsCount').textContent = selectedPatternBets.length;
+                
+                // Atualizar alturas das seções expansíveis
+                resultsSection.updateHeight();
+                
+                // Expandir automaticamente a seção de resultados
+                if (document.getElementById('resultsContainer').style.maxHeight === '0px') {
+                    document.getElementById('resultsHeader').click();
+                }
+                
+                // Garantir que a aba "Todos" esteja ativa
+                document.getElementById('allBetsTab').click();
+            }
+            
+            // Função para download de palpites gerados a partir de padrões selecionados (detalhado)
+            function downloadPatternDetailedBets() {
+                if (selectedPatternBets.length === 0) {
+                    alert('Nenhum palpite gerado. Selecione padrões e gere palpites primeiro.');
+                    return;
+                }
+                
+                let text = `PALPITES GERADOS COM PADRÕES DE DÍGITOS - DIA DE SORTE\n`;
+                text += `Data de geração: ${new Date().toLocaleDateString()}\n\n`;
+                text += `Total de palpites: ${selectedPatternBets.length}\n\n`;
+                
+                // Adicionar cada palpite com detalhes
+                selectedPatternBets.forEach(bet => {
+                    text += `Palpite #${bet.index}\n`;
+                    text += `Padrão Inicial: ${bet.startPattern}\n`;
+                    text += `Padrão Final: ${bet.endPattern}\n`;
+                    text += `Números: ${bet.numbers.join(' ')} ${monthAbbrevMap[bet.luckyMonth]}\n`;
+                    text += `Distribuição: ${bet.distribution.low} baixas, ${bet.distribution.medium} médias, ${bet.distribution.high} altas\n\n`;
+                });
+                
+                // Criar e simular clique no link de download
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'palpites_padrao_detalhado.txt';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpar
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // Função para download de palpites gerados a partir de padrões selecionados (simples)
+            function downloadPatternSimpleBets() {
+                if (selectedPatternBets.length === 0) {
+                    alert('Nenhum palpite gerado. Selecione padrões e gere palpites primeiro.');
+                    return;
+                }
+                
+                let text = '';
+                
+                // Adicionar apenas os números de cada palpite
+                selectedPatternBets.forEach(bet => {
+                    text += `${bet.numbers.join(' ')} ${monthAbbrevMap[bet.luckyMonth]}\n`;
+                });
+                
+                // Criar e simular clique no link de download
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'palpites_padrao_simples.txt';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpar
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // Função para criar checkboxes para seleção de padrões
+            function createPatternSelectors() {
+                const startContainer = document.getElementById('startPatternSelectors');
+                const endContainer = document.getElementById('endPatternSelectors');
+                
+                if (!startContainer || !endContainer) return;
+                
+                // Limpar contêineres
+                startContainer.innerHTML = '';
+                endContainer.innerHTML = '';
+                
+                // Ordenar os padrões por frequência
+                const sortedStartPatterns = Object.entries(startDigitFrequency)
+                    .sort((a, b) => b[1].count - a[1].count);
+                
+                const sortedEndPatterns = Object.entries(endDigitFrequency)
+                    .sort((a, b) => b[1].count - a[1].count);
+                
+                // Criar checkboxes para padrões iniciais
+                sortedStartPatterns.forEach(([pattern, data]) => {
+                    const div = document.createElement('div');
+                    div.className = 'pattern-checkbox';
+                    
+                    const percentage = (data.count / patternFrequency.length * 100).toFixed(1);
+                    
+                    div.innerHTML = `
+                        <input type="checkbox" id="start_${pattern.replace(/\s+/g, '_')}" value="${pattern}">
+                        <label for="start_${pattern.replace(/\s+/g, '_')}" class="text-white">
+                            ${pattern} (${data.count}x, ${percentage}%)
+                        </label>
+                    `;
+                    
+                    startContainer.appendChild(div);
+                });
+                
+                // Criar checkboxes para padrões finais
+                sortedEndPatterns.forEach(([pattern, data]) => {
+                    const div = document.createElement('div');
+                    div.className = 'pattern-checkbox';
+                    
+                    const percentage = (data.count / patternFrequency.length * 100).toFixed(1);
+                    
+                    div.innerHTML = `
+                        <input type="checkbox" id="end_${pattern.replace(/\s+/g, '_')}" value="${pattern}">
+                        <label for="end_${pattern.replace(/\s+/g, '_')}" class="text-white">
+                            ${pattern} (${data.count}x, ${percentage}%)
+                        </label>
+                    `;
+                    
+                    endContainer.appendChild(div);
+                });
             }
             
             // Função para gerar palpites baseados nos padrões frequentes detectados
@@ -2722,27 +3200,26 @@ isto para este código..
                 // Encontrar valor máximo para destacar os mais frequentes
                 const maxFreq = Math.max(...Object.values(numberFrequency));
                 
-                // Gerar uma classe baseada na frequência relativa
-                function getFrequencyClass(freq) {
-                    if (maxFreq === 0) return 'freq-low';
-                    
-                    const relativeFreq = freq / maxFreq;
-                    if (relativeFreq > 0.7) return 'freq-high';
-                    if (relativeFreq > 0.4) return 'freq-medium';
-                    return 'freq-low';
-                }
-                
                 // Criar elemento para cada número
                 for (let i = 1; i <= 31; i++) {
                     const freq = numberFrequency[i] || 0;
-                    const freqClass = getFrequencyClass(freq);
+                    
+                    // Categorizar por faixa (baixa, média, alta)
+                    let categoryClass = '';
+                    if (i <= 10) {
+                        categoryClass = 'freq-low'; // Números baixos (1-10)
+                    } else if (i <= 20) {
+                        categoryClass = 'freq-medium'; // Números médios (11-20)
+                    } else {
+                        categoryClass = 'freq-high'; // Números altos (21-31)
+                    }
                     
                     const ball = document.createElement('div');
                     // Adiciona a classe freq-max ao número mais frequente
                     if (freq === maxFreq && freq > 0) {
-                        ball.className = `frequency-ball ${freqClass} freq-max`;
+                        ball.className = `frequency-ball ${categoryClass} freq-max`;
                     } else {
-                        ball.className = `frequency-ball ${freqClass}`;
+                        ball.className = `frequency-ball ${categoryClass}`;
                     }
                     
                     // Mostrar número
@@ -2796,10 +3273,13 @@ isto para este código..
             
             // Função para renderizar as estatísticas de padrões de dígitos iniciais
             function renderStartDigitStats() {
-                const container = document.getElementById('startDigitStats');
-                if (!container) return;
+                const topContainer = document.getElementById('topStartDigitPatterns');
+                const moreContainer = document.getElementById('moreStartDigitPatterns');
                 
-                container.innerHTML = '';
+                if (!topContainer || !moreContainer) return;
+                
+                topContainer.innerHTML = '';
+                moreContainer.innerHTML = '';
                 
                 // Obter o total de ocorrências para calcular percentuais
                 const totalOccurrences = Object.values(startDigitFrequency).reduce((sum, item) => sum + item.count, 0);
@@ -2809,8 +3289,8 @@ isto para este código..
                 const sortedPatterns = Object.entries(startDigitFrequency)
                     .sort((a, b) => b[1].count - a[1].count);
                 
-                // Renderizar cada padrão
-                sortedPatterns.forEach(([pattern, data]) => {
+                // Renderizar apenas os 10 primeiros no container principal
+                sortedPatterns.slice(0, 10).forEach(([pattern, data]) => {
                     const percentage = (data.count / totalOccurrences * 100).toFixed(1);
                     const width = Math.max(5, Math.round(data.count / sortedPatterns[0][1].count * 100));
                     
@@ -2825,16 +3305,46 @@ isto para este código..
                             <div class="pattern-bar" style="width: ${width}%"></div>
                         </div>
                     `;
-                    container.appendChild(patternDiv);
+                    topContainer.appendChild(patternDiv);
                 });
+                
+                // Renderizar o restante no container oculto
+                if (sortedPatterns.length > 10) {
+                    sortedPatterns.slice(10).forEach(([pattern, data]) => {
+                        const percentage = (data.count / totalOccurrences * 100).toFixed(1);
+                        const width = Math.max(5, Math.round(data.count / sortedPatterns[0][1].count * 100));
+                        
+                        const patternDiv = document.createElement('div');
+                        patternDiv.className = 'bg-teal-700 rounded p-2 mt-2';
+                        patternDiv.innerHTML = `
+                            <div class="flex justify-between mb-1">
+                                <div class="text-white font-medium">${pattern}</div>
+                                <div class="text-teal-200">${data.count} (${percentage}%)</div>
+                            </div>
+                            <div class="w-full bg-teal-900 rounded-full h-2">
+                                <div class="pattern-bar" style="width: ${width}%"></div>
+                            </div>
+                        `;
+                        moreContainer.appendChild(patternDiv);
+                    });
+                    
+                    // Mostrar o botão para ver mais
+                    document.getElementById('showMoreStartBtn').style.display = 'block';
+                } else {
+                    // Ocultar o botão se não há mais itens
+                    document.getElementById('showMoreStartBtn').style.display = 'none';
+                }
             }
             
             // Função para renderizar as estatísticas de padrões de dígitos finais
             function renderEndDigitStats() {
-                const container = document.getElementById('endDigitStats');
-                if (!container) return;
+                const topContainer = document.getElementById('topEndDigitPatterns');
+                const moreContainer = document.getElementById('moreEndDigitPatterns');
                 
-                container.innerHTML = '';
+                if (!topContainer || !moreContainer) return;
+                
+                topContainer.innerHTML = '';
+                moreContainer.innerHTML = '';
                 
                 // Obter o total de ocorrências para calcular percentuais
                 const totalOccurrences = Object.values(endDigitFrequency).reduce((sum, item) => sum + item.count, 0);
@@ -2844,8 +3354,8 @@ isto para este código..
                 const sortedPatterns = Object.entries(endDigitFrequency)
                     .sort((a, b) => b[1].count - a[1].count);
                 
-                // Renderizar cada padrão
-                sortedPatterns.forEach(([pattern, data]) => {
+                // Renderizar apenas os 10 primeiros no container principal
+                sortedPatterns.slice(0, 10).forEach(([pattern, data]) => {
                     const percentage = (data.count / totalOccurrences * 100).toFixed(1);
                     const width = Math.max(5, Math.round(data.count / sortedPatterns[0][1].count * 100));
                     
@@ -2860,9 +3370,55 @@ isto para este código..
                             <div class="pattern-bar" style="width: ${width}%"></div>
                         </div>
                     `;
-                    container.appendChild(patternDiv);
+                    topContainer.appendChild(patternDiv);
                 });
+                
+                // Renderizar o restante no container oculto
+                if (sortedPatterns.length > 10) {
+                    sortedPatterns.slice(10).forEach(([pattern, data]) => {
+                        const percentage = (data.count / totalOccurrences * 100).toFixed(1);
+                        const width = Math.max(5, Math.round(data.count / sortedPatterns[0][1].count * 100));
+                        
+                        const patternDiv = document.createElement('div');
+                        patternDiv.className = 'bg-teal-700 rounded p-2 mt-2';
+                        patternDiv.innerHTML = `
+                            <div class="flex justify-between mb-1">
+                                <div class="text-white font-medium">${pattern}</div>
+                                <div class="text-teal-200">${data.count} (${percentage}%)</div>
+                            </div>
+                            <div class="w-full bg-teal-900 rounded-full h-2">
+                                <div class="pattern-bar" style="width: ${width}%"></div>
+                            </div>
+                        `;
+                        moreContainer.appendChild(patternDiv);
+                    });
+                    
+                    // Mostrar o botão para ver mais
+                    document.getElementById('showMoreEndBtn').style.display = 'block';
+                } else {
+                    // Ocultar o botão se não há mais itens
+                    document.getElementById('showMoreEndBtn').style.display = 'none';
+                }
             }
+            
+            // Adicionar event listeners para os botões de mostrar mais
+            document.getElementById('showMoreStartBtn').addEventListener('click', function() {
+                const container = document.getElementById('moreStartDigitPatterns');
+                container.classList.toggle('visible');
+                this.textContent = container.classList.contains('visible') ? 'Mostrar Menos' : 'Mostrar Mais';
+                
+                // Atualizar a altura do container pai
+                frequencySection.updateHeight();
+            });
+            
+            document.getElementById('showMoreEndBtn').addEventListener('click', function() {
+                const container = document.getElementById('moreEndDigitPatterns');
+                container.classList.toggle('visible');
+                this.textContent = container.classList.contains('visible') ? 'Mostrar Menos' : 'Mostrar Mais';
+                
+                // Atualizar a altura do container pai
+                frequencySection.updateHeight();
+            });
             
             // Função para renderizar exemplos de padrões frequentes
             function renderPatternExamples() {
@@ -3021,6 +3577,9 @@ isto para este código..
                 renderStartDigitStats();
                 renderEndDigitStats();
                 renderPatternExamples();
+                
+                // Criar checkboxes para seleção de padrões
+                createPatternSelectors();
                 
                 // Exibir a seção
                 document.getElementById('digitPatternsStats').style.display = 'block';
@@ -3744,6 +4303,17 @@ isto para este código..
             
             // Add event listener for generate from pattern button
             document.getElementById('generateFromPatternBtn').addEventListener('click', generateBetsFromPatterns);
+            
+            // Add event listener for generate from selected patterns button
+            document.getElementById('generateFromSelectedPatternsBtn').addEventListener('click', generateBetsFromSelectedPatterns);
+            
+            // Add event listeners for download pattern buttons
+            document.getElementById('downloadPatternSimpleBtn').addEventListener('click', downloadPatternSimpleBets);
+            document.getElementById('downloadPatternDetailedBtn').addEventListener('click', downloadPatternDetailedBets);
+            
+            // Desabilitar botões de download de padrões inicialmente
+            document.getElementById('downloadPatternSimpleBtn').disabled = true;
+            document.getElementById('downloadPatternDetailedBtn').disabled = true;
             
             // Configurar event listener para botão de busca
             document.getElementById('fetchResultsBtn').addEventListener('click', fetchResultsFromAPIs);
