@@ -1237,7 +1237,7 @@
             const showModalBtn = document.getElementById('showInstructionsBtn');
             const closeModalBtn = document.getElementById('closeModalBtn');
             const closeModalX = document.getElementById('closeModal');
-			const mixerSection = setupCollapsibleSection('mixerHeader', 'mixerContainer', false); // Nova seção do misturador
+			//const mixerSection = setupCollapsibleSection('mixerHeader', 'mixerContainer', false); // Nova seção do misturador
             
             // Show modal
             showModalBtn.addEventListener('click', function() {
@@ -1579,6 +1579,7 @@
             const statsSection = setupCollapsibleSection('statsHeader', 'statsContainer', false);
             const specificSection = setupCollapsibleSection('specificHeader', 'specificContainer', false);
             const resultsSection = setupCollapsibleSection('resultsHeader', 'resultsContainer', true);
+			const mixerSection = setupCollapsibleSection('mixerHeader', 'mixerContainer', false);
             
             // Corrigir o problema das seções que não abrem, forçando a inicialização
             setTimeout(() => {
@@ -1720,6 +1721,9 @@
             let mediumBets = [];
             let highBets = [];
             let validBetsCount = 0;
+			// Variáveis para o misturador de palpites
+			let mixedGeneratedBets = [];
+			let patternGeneratedBets = [];
 
             // Variáveis para a funcionalidade de combinação específica
             let specificPossibleNumbers = [];
@@ -4793,9 +4797,16 @@
             document.getElementById('downloadPatternDetailedBtn').addEventListener('click', downloadPatternDetailedBets);
 			
 			// Event listeners para os botões do misturador
-			document.getElementById('generateMixedBtn').addEventListener('click', generateMixedBets);
+			//document.getElementById('generateMixedBtn').addEventListener('click', generateMixedBets);
+			// Event listeners para os botões do misturador
+			document.getElementById('generateMixedBtn').addEventListener('click', function() {
+			console.log("Botão de gerar palpites misturados clicado!");
+			generateMixedBets();
+			});
 			document.getElementById('downloadMixedSimpleBtn').addEventListener('click', downloadMixedSimpleBets);
 			document.getElementById('downloadMixedDetailedBtn').addEventListener('click', downloadMixedDetailedBets);
+
+			
 
 			// Event listeners para os inputs do misturador
 			const mixerInputs = [
@@ -4901,6 +4912,7 @@
 
 		// Gerar palpites misturados de diferentes seções
 		function generateMixedBets() {
+		    console.log("Função generateMixedBets chamada!");
 			const totalMixedBets = parseInt(document.getElementById('totalMixedBets').value);
 			
 			// Obter as quantidades desejadas de cada tipo de palpite

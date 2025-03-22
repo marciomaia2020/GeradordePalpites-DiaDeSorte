@@ -358,42 +358,6 @@
             border-top-color: white;
             animation: spinner 0.8s linear infinite;
         }
-				/* Estilos para o misturador de palpites */
-		.mixer-section {
-			background-color: #f0f9ff;
-			border-radius: 8px;
-			padding: 12px;
-			margin-bottom: 16px;
-		}
-
-		.dark .mixer-section {
-			background-color: #0c4a6e;
-		}
-
-		.mixer-card {
-			border: 1px solid #cbd5e1;
-			border-radius: 8px;
-			padding: 12px;
-			margin-bottom: 8px;
-			background-color: white;
-			transition: all 0.2s ease;
-		}
-
-		.mixer-card:hover {
-			border-color: #5D5CDE;
-			box-shadow: 0 2px 8px rgba(93, 92, 222, 0.2);
-		}
-
-		.dark .mixer-card {
-			background-color: #1e293b;
-			border-color: #334155;
-		}
-
-		.dark .mixer-card:hover {
-			border-color: #818cf8;
-			box-shadow: 0 2px 8px rgba(129, 140, 248, 0.2);
-		}
-		
     </style>
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
@@ -1057,124 +1021,7 @@
                 </div>
             </div>
         </div>
-		<!-- Seção: Misturador de Palpites (NOVA) -->
-		<div class="mb-8">
-			<div class="flex items-center justify-between cursor-pointer mb-2" id="mixerHeader">
-				<h2 class="text-xl font-semibold flex items-center">
-					<span>Misturador de Palpites</span> 
-					<span class="text-sm font-bold ml-2 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full">NOVO</span>
-				</h2>
-				<svg class="h-6 w-6 text-gray-500 dark:text-gray-400 toggle-btn" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-				</svg>
-			</div>
-			<div id="mixerContainer" class="transition-height bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded" style="max-height: 0px; overflow: hidden;">
-				<div class="p-4">
-					<div class="mb-6 bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
-						<h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">Crie um Conjunto Personalizado de Palpites</h3>
-						<p class="text-blue-700 dark:text-blue-300 mb-3">
-							Esta funcionalidade permite combinar palpites de diferentes seções do aplicativo. Você pode selecionar quantos palpites deseja 
-							de cada seção e criar um conjunto personalizado que mistura diversas estratégias.
-						</p>
-					</div>
-					
-					<div class="mb-4">
-						<label class="block font-medium mb-2">Quantidade total de palpites a gerar:</label>
-						<input type="number" id="totalMixedBets" min="1" max="50" value="20" class="p-2 border rounded w-full sm:w-48 dark:bg-gray-700 dark:border-gray-600 text-base">
-					</div>
-					
-					<div class="space-y-4">
-						<div class="mixer-section">
-							<h3 class="text-lg font-semibold mb-3">Selecione a quantidade de palpites de cada seção:</h3>
-							
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div class="mixer-card">
-									<div class="flex justify-between items-center mb-2">
-										<h4 class="font-medium">Seção Configurações</h4>
-										<div class="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded-full">Geral</div>
-									</div>
-									<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Palpites baseados nas configurações gerais, utilizando combinações não sorteadas.</p>
-									<div class="flex items-center">
-										<label class="mr-2">Quantidade:</label>
-										<input type="number" id="configMixBets" min="0" value="1" class="p-1 border rounded w-16 dark:bg-gray-700 dark:border-gray-600 text-base">
-									</div>
-								</div>
-								
-								<div class="mixer-card">
-									<div class="flex justify-between items-center mb-2">
-										<h4 class="font-medium">Seção Palpites Gerados</h4>
-										<div class="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded-full">Geral</div>
-									</div>
-									<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Palpites já gerados anteriormente na seção de Palpites Gerados.</p>
-									<div class="flex items-center">
-										<label class="mr-2">Quantidade:</label>
-										<input type="number" id="generatedMixBets" min="0" value="5" class="p-1 border rounded w-16 dark:bg-gray-700 dark:border-gray-600 text-base">
-									</div>
-								</div>
-								
-								<div class="mixer-card">
-									<div class="flex justify-between items-center mb-2">
-										<h4 class="font-medium">Padrões de Dígitos</h4>
-										<div class="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full">Estatístico</div>
-									</div>
-									<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Palpites baseados nos padrões de dígitos mais frequentes nos sorteios anteriores.</p>
-									<div class="flex items-center">
-										<label class="mr-2">Quantidade:</label>
-										<input type="number" id="patternMixBets" min="0" value="5" class="p-1 border rounded w-16 dark:bg-gray-700 dark:border-gray-600 text-base">
-									</div>
-								</div>
-								
-								<div class="mixer-card">
-									<div class="flex justify-between items-center mb-2">
-										<h4 class="font-medium">Combinação Específica</h4>
-										<div class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full">Dirigido</div>
-									</div>
-									<p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Palpites baseados na combinação específica de dígitos selecionada.</p>
-									<div class="flex items-center">
-										<label class="mr-2">Quantidade:</label>
-										<input type="number" id="specificMixBets" min="0" value="9" class="p-1 border rounded w-16 dark:bg-gray-700 dark:border-gray-600 text-base">
-									</div>
-								</div>
-							</div>
-							
-							<div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900 rounded-lg text-yellow-800 dark:text-yellow-200 text-sm">
-								<p>Os totais da distribuição são ajustados automaticamente para atingir o número total desejado de palpites.</p>
-							</div>
-						</div>
-					</div>
-					
-					<div class="flex gap-2 mt-6 mb-4">
-						<button id="generateMixedBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded">
-							Gerar Palpites Misturados
-						</button>
-					</div>
-					
-					<div id="mixedBetsContainer" class="mt-5 hidden">
-						<div class="flex justify-between items-center mb-4">
-							<h3 class="text-lg font-semibold">Palpites Misturados Gerados</h3>
-							<div class="flex gap-2">
-								<button id="downloadMixedSimpleBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-										<path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-									</svg>
-									Somente Dezenas
-								</button>
-								<button id="downloadMixedDetailedBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-										<path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-									</svg>
-									Baixar Detalhado
-								</button>
-							</div>
-						</div>
-						
-						<div id="mixedResultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-							<!-- Resultados dinâmicos serão mostrados aqui -->
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+
         <!-- Seção: Palpites Gerados -->
         <div class="mb-8">
             <div class="flex items-center justify-between cursor-pointer mb-2" id="resultsHeader">
@@ -1237,7 +1084,6 @@
             const showModalBtn = document.getElementById('showInstructionsBtn');
             const closeModalBtn = document.getElementById('closeModalBtn');
             const closeModalX = document.getElementById('closeModal');
-			const mixerSection = setupCollapsibleSection('mixerHeader', 'mixerContainer', false); // Nova seção do misturador
             
             // Show modal
             showModalBtn.addEventListener('click', function() {
@@ -2164,7 +2010,7 @@
                     bet.numbers.forEach(num => {
                         const parsedNum = parseInt(num);
                         const categoryClass = getNumberCategoryClass(parsedNum);
-                        numbersHTML += `<span class="inline-block ${categoryClass} rounded-full px-3 py-1 text-sm font-semibold">${formatNumber(num)}</span>`;
+                        numbersHTML += `<span class="inline-block ${categoryClass} rounded-full px-3 py-1 text-sm font-semibold">${num}</span>`;
                     });
                     
                     // Adicionar o mês da sorte
@@ -2567,9 +2413,6 @@
                 
                 // Exibir todos os palpites (garantindo que a aba "Todos" esteja ativa)
                 document.getElementById('allBetsTab').click();
-				
-				// Armazenar os palpites gerados para uso no misturador
-				patternGeneratedBets = [...allGeneratedBets];
             }
 
             // Function to format a number with leading zero if needed
@@ -3733,321 +3576,6 @@
             }
 
             // Function to analyze the frequency of digit combinations in historical results
-            // function analyzeFrequency() {
-            //     const resultsText = document.getElementById('historicalResults').value.trim();
-            //     if (!resultsText) {
-            //         alert('Por favor, insira os resultados históricos.');
-            //         return;
-            //     }
-
-            //     const results = [];
-            //     const lines = resultsText.split('\n');
-                
-            //     // Reset statistics
-            //     numberCategoryStats = {
-            //         low: { count: 0, percentage: 0 },
-            //         medium: { count: 0, percentage: 0 },
-            //         high: { count: 0, percentage: 0 },
-            //         total: 0
-            //     };
-                
-            //     // Reset number frequency
-            //     for (let i = 1; i <= 31; i++) {
-            //         numberFrequency[i] = 0;
-            //     }
-                
-            //     // Reset month frequency
-            //     for (const month in monthFrequency) {
-            //         monthFrequency[month] = 0;
-            //     }
-                
-            //     // Reset pattern frequency
-            //     startDigitFrequency = {};
-            //     endDigitFrequency = {};
-            //     patternFrequency = [];
-
-            //     // Parse each line of results
-            //     for (const line of lines) {
-            //         if (line.trim() === '') continue;
-                    
-            //         // Split the line into words
-            //         const parts = line.trim().split(/\s+/);
-                    
-            //         // Check if the last part might be a month
-            //         let numbers = [];
-            //         let month = null;
-                    
-            //         // If we have at least 7 numbers
-            //         if (parts.length >= 7) {
-            //             // Try to parse the last item as a month
-            //             if (parts.length > 7) {
-            //                 const lastPart = parts[parts.length - 1];
-            //                 month = parseMonth(lastPart);
-                            
-            //                 if (month) {
-            //                     // If it's a month, exclude it from numbers
-            //                     numbers = parts.slice(0, -1).map(n => parseInt(n.trim()));
-            //                 } else {
-            //                     // No month found, all parts are numbers
-            //                     numbers = parts.map(n => parseInt(n.trim()));
-            //                 }
-            //             } else {
-            //                 // Exactly 7 parts, assume all are numbers
-            //                 numbers = parts.map(n => parseInt(n.trim()));
-            //             }
-                        
-            //             // Increment month frequency if a month was found
-            //             if (month) {
-            //                 monthFrequency[month]++;
-            //             }
-                        
-            //             results.push({
-            //                 numbers: numbers,
-            //                 month: month
-            //             });
-                        
-            //             // Count numbers by category for statistics
-            //             numbers.forEach(num => {
-            //                 if (num >= 1 && num <= 31) { // Ensure valid numbers only
-            //                     numberCategoryStats.total++;
-                                
-            //                     // Increment the frequency for this specific number
-            //                     numberFrequency[num] = (numberFrequency[num] || 0) + 1;
-                                
-            //                     if (num <= 10) {
-            //                         numberCategoryStats.low.count++;
-            //                     } else if (num <= 20) {
-            //                         numberCategoryStats.medium.count++;
-            //                     } else {
-            //                         numberCategoryStats.high.count++;
-            //                     }
-            //                 }
-            //             });
-            //         }
-            //     }
-
-            //     if (results.length === 0) {
-            //         alert('Nenhum resultado válido encontrado. Verifique o formato.');
-            //         return;
-            //     }
-                
-            //     // Analisar padrões de dígitos
-            //     analyzeDigitPatterns(results);
-                
-            //     // Renderiza o gráfico de estatísticas de categorias
-            //     renderNumberCategoryChart();
-                
-            //     // Renderiza a grade de frequência dos números
-            //     renderNumberFrequencyGrid();
-                
-            //     // Renderiza a frequência dos meses
-            //     renderMonthFrequency();
-
-            //     // Count digit occurrences in each result
-            //     const digitCombinationCounts = {};
-                
-            //     // Inicializar contadores para todas as combinações possíveis
-            //     validDigitCombinations.forEach(combo => {
-            //         digitCombinationCounts[combo] = 0;
-            //     });
-                
-            //     // Iterate through each result
-            //     results.forEach(result => {
-            //         // Get all digits from all numbers in this result
-            //         const allDigits = new Set();
-            //         result.numbers.forEach(num => {
-            //             getDigits(num).forEach(digit => allDigits.add(digit));
-            //         });
-                    
-            //         // Convert to array and sort
-            //         const digitsArray = Array.from(allDigits).sort((a, b) => a - b);
-                    
-            //         // Only consider results with 5 or more distinct digits
-            //         if (digitsArray.length >= 5) {
-            //             // Verificar quais das combinações válidas estão presentes neste resultado
-            //             validDigitCombinations.forEach(combo => {
-            //                 const comboDigits = combo.split(',').map(Number);
-                            
-            //                 // Verificar se todos os dígitos da combinação estão presentes
-            //                 if (comboDigits.every(digit => digitsArray.includes(digit))) {
-            //                     digitCombinationCounts[combo]++;
-            //                 }
-            //             });
-            //         }
-            //     });
-
-            //     // Guardar as frequências para uso posterior
-            //     drawnCombinations = {...digitCombinationCounts};
-                
-            //     // Convert to array for sorting
-            //     const combinationsArray = Object.entries(digitCombinationCounts)
-            //         .map(([combo, count]) => ({ combo, count }))
-            //         .sort((a, b) => b.count - a.count);
-
-            //     // Identificar combinações que ainda não foram sorteadas
-            //     undrawnCombinations = validDigitCombinations.filter(combo => 
-            //         digitCombinationCounts[combo] === 0
-            //     );
-                
-            //     // Atualizar contador de combinações não sorteadas
-            //     document.getElementById('undrawnCountDisplay').textContent = undrawnCombinations.length;
-                
-            //     // Display results
-            //     const frequencyResults = document.getElementById('frequencyResults');
-            //     const frequencyTableBody = document.getElementById('frequencyTableBody');
-            //     const topCombinations = document.getElementById('topCombinations');
-            //     const undrawnCombinationsContent = document.getElementById('undrawnCombinationsContent');
-
-            //     frequencyResults.classList.remove('hidden');
-            //     frequencyTableBody.innerHTML = '';
-            //     undrawnCombinationsContent.innerHTML = '';
-                
-            //     if (combinationsArray.length === 0) {
-            //         topCombinations.innerHTML = 'Nenhuma combinação de 5 dígitos encontrada nos resultados.';
-            //         return;
-            //     }
-
-            //     // Show the top combinations with highlighting for 5 digits
-            //     const top5Combos = combinationsArray.filter(item => item.count > 0).slice(0, 5);
-                
-            //     let topCombosHTML = `
-            //         <div class="font-bold text-xl mb-3 flex items-center">
-            //             Combinações de <span class="mx-1 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-0.5 rounded-full">5</span> Dígitos Mais Frequentes
-            //         </div>
-            //         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            //     `;
-                
-            //     top5Combos.forEach((item, index) => {
-            //         const percentage = ((item.count / results.length) * 100).toFixed(1);
-            //         topCombosHTML += `
-            //             <div class="bg-green-100 dark:bg-green-900 p-3 rounded-lg border-2 border-green-500">
-            //                 <div class="font-bold text-lg text-green-800 dark:text-green-200">${index + 1}. ${item.combo}</div>
-            //                 <div class="text-green-700 dark:text-green-300">
-            //                     ${item.count} de ${results.length} resultados (${percentage}%)
-            //                 </div>
-            //             </div>
-            //         `;
-            //     });
-                
-            //     topCombosHTML += `</div>`;
-                
-            //     // Adicionar informação sobre combinações que ainda não apareceram
-            //     topCombosHTML += `
-            //         <div class="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-            //             <div class="font-bold text-yellow-800 dark:text-yellow-200">
-            //                 ${undrawnCombinations.length} combinações ainda não apareceram em nenhum sorteio (de um total de ${validDigitCombinations.length})
-            //             </div>
-            //         </div>
-            //     `;
-                
-            //     topCombinations.innerHTML = topCombosHTML;
-                
-            //     // Mostrar as combinações não sorteadas
-            //     if (undrawnCombinations.length > 0) {
-            //         undrawnCombinations.forEach(combo => {
-            //             const comboDiv = document.createElement('div');
-            //             comboDiv.className = 'bg-blue-50 dark:bg-blue-800 p-2 rounded border border-blue-200 dark:border-blue-700';
-            //             comboDiv.innerHTML = `<div class="text-blue-800 dark:text-blue-200 font-medium">${combo}</div>`;
-            //             undrawnCombinationsContent.appendChild(comboDiv);
-            //         });
-                    
-            //         document.getElementById('undrawnCombinations').style.display = 'block';
-                    
-            //         // NOVA FUNCIONALIDADE: Preencher a área "Combinações de Dígitos" com apenas as não sorteadas
-            //         document.getElementById('digitCombinations').value = undrawnCombinations.join('\n');
-                    
-            //         // Atualizar a variável global para usar apenas as combinações não sorteadas
-            //         validDigitCombinations = [...undrawnCombinations];
-                    
-            //         // Atualizar o texto do cabeçalho
-            //         const combinationsHeader = document.querySelector('#digitCombinationsHeader h2');
-            //         if (combinationsHeader) {
-            //             combinationsHeader.innerHTML = `
-            //                 <span>Combinações de Dígitos</span> 
-            //                 <span class="text-sm font-bold ml-2 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full">(${undrawnCombinations.length})</span>
-            //             `;
-            //         }
-                    
-            //         // Limpar quaisquer palpites gerados anteriormente
-            //         document.getElementById('bettingResults').innerHTML = '';
-            //         document.getElementById('totalBetsCount').textContent = '0';
-            //         document.getElementById('lowCount').textContent = '0';
-            //         document.getElementById('mediumCount').textContent = '0';
-            //         document.getElementById('highCount').textContent = '0';
-                    
-            //         // Expandir a seção de combinações de dígitos
-            //         if (document.getElementById('digitCombinationsContainer').style.maxHeight === '0px') {
-            //             document.getElementById('digitCombinationsHeader').click();
-            //         }
-            //     } else {
-            //         document.getElementById('undrawnCombinations').style.display = 'none';
-            //     }
-
-            //     // Fill the frequency table with all combinations that appeared
-            //     combinationsArray.filter(item => item.count > 0).forEach(({ combo, count }) => {
-            //         const percentage = ((count / results.length) * 100).toFixed(1);
-                    
-            //         const row = document.createElement('tr');
-                    
-            //         // Destacar as combinações de 5 dígitos
-            //         row.classList.add('bg-green-100', 'dark:bg-green-800');
-            //         row.innerHTML = `
-            //             <td class="px-2 py-2 font-bold">${combo}</td>
-            //             <td class="px-2 py-2 font-bold">${count} de ${results.length}</td>
-            //             <td class="px-2 py-2 font-bold">${percentage}%</td>
-            //         `;
-                    
-            //         frequencyTableBody.appendChild(row);
-            //     });
-                
-            //     // Atualizar altura da seção de frequência após preenchimento
-            //     frequencySection.updateHeight();
-                
-            //     // Atualizar o dropdown para mostrar as frequências nas combinações
-            //     updateSpecificComboDropdown();
-                
-            //     // Disparar evento change para atualizar a exibição
-            //     specificComboSelect.dispatchEvent(new Event('change'));
-            // }
-
-                /**
-                 * Padroniza um número para o formato de dois dígitos
-                 * @param {number|string} num - O número a ser formatado
-                 * @returns {string} - O número formatado como string com dois dígitos
-                 */
-                 function formatNumber(num) {
-                    // Converter para número caso seja string
-                    const numInt = parseInt(num);
-                    
-                    // Verificar se é um número válido
-                    if (isNaN(numInt)) {
-                        return "";
-                    }
-                    
-                    // Aplicar o formato com zero à esquerda se necessário
-                    return numInt < 10 ? '0' + numInt : numInt.toString();
-                }
-
-                /**
-                 * Processa uma array de strings para extrair números válidos
-                 * @param {string[]} parts - Array de strings a serem processadas como números
-                 * @returns {number[]} - Array de números válidos
-                 */
-                function processNumberParts(parts) {
-                    return parts.map(part => {
-                        // Remover qualquer caractere não numérico
-                        const cleanPart = part.trim().replace(/[^\d]/g, '');
-                        
-                        // Converter para número
-                        const num = parseInt(cleanPart);
-                        
-                        // Retornar o número ou NaN se inválido
-                        return isNaN(num) ? NaN : num;
-                    }).filter(num => !isNaN(num) && num >= 1 && num <= 31); // Filtrar para manter apenas números válidos entre 1 e 31
-                }
-
-
-
             function analyzeFrequency() {
                 const resultsText = document.getElementById('historicalResults').value.trim();
                 if (!resultsText) {
@@ -4100,53 +3628,47 @@
                             month = parseMonth(lastPart);
                             
                             if (month) {
-                                // Se for um mês, excluir da lista de números e processar os números
-                                const numberParts = parts.slice(0, -1);
-                                numbers = processNumberParts(numberParts);
+                                // If it's a month, exclude it from numbers
+                                numbers = parts.slice(0, -1).map(n => parseInt(n.trim()));
                             } else {
-                                // Se não for um mês, processar todos como números
-                                numbers = processNumberParts(parts);
+                                // No month found, all parts are numbers
+                                numbers = parts.map(n => parseInt(n.trim()));
                             }
                         } else {
-                            // Exatamente 7 partes, assumir que todos são números
-                            numbers = processNumberParts(parts);
+                            // Exactly 7 parts, assume all are numbers
+                            numbers = parts.map(n => parseInt(n.trim()));
                         }
                         
-                        // Incrementar a frequência do mês, se um mês foi encontrado
+                        // Increment month frequency if a month was found
                         if (month) {
                             monthFrequency[month]++;
                         }
                         
-                        // Só processar resultados com pelo menos 7 números válidos
-                        if (numbers.length >= 7) {
-                            // Garantir apenas os primeiros 7 números
-                            const validNumbers = numbers.slice(0, 7);
-                            
-                            results.push({
-                                numbers: validNumbers,
-                                month: month
-                            });
-                            
-                            // Contar números por categoria para estatísticas
-                            validNumbers.forEach(num => {
-                                if (num >= 1 && num <= 31) { // Garantir apenas números válidos
-                                    numberCategoryStats.total++;
-                                    
-                                    // Incrementar a frequência para este número específico
-                                    numberFrequency[num] = (numberFrequency[num] || 0) + 1;
-                                    
-                                    if (num <= 10) {
-                                        numberCategoryStats.low.count++;
-                                    } else if (num <= 20) {
-                                        numberCategoryStats.medium.count++;
-                                    } else {
-                                        numberCategoryStats.high.count++;
-                                    }
+                        results.push({
+                            numbers: numbers,
+                            month: month
+                        });
+                        
+                        // Count numbers by category for statistics
+                        numbers.forEach(num => {
+                            if (num >= 1 && num <= 31) { // Ensure valid numbers only
+                                numberCategoryStats.total++;
+                                
+                                // Increment the frequency for this specific number
+                                numberFrequency[num] = (numberFrequency[num] || 0) + 1;
+                                
+                                if (num <= 10) {
+                                    numberCategoryStats.low.count++;
+                                } else if (num <= 20) {
+                                    numberCategoryStats.medium.count++;
+                                } else {
+                                    numberCategoryStats.high.count++;
                                 }
-                            });
-                        }
+                            }
+                        });
                     }
                 }
+
                 if (results.length === 0) {
                     alert('Nenhum resultado válido encontrado. Verifique o formato.');
                     return;
@@ -4791,27 +4313,6 @@
             // Add event listeners for download pattern buttons
             document.getElementById('downloadPatternSimpleBtn').addEventListener('click', downloadPatternSimpleBets);
             document.getElementById('downloadPatternDetailedBtn').addEventListener('click', downloadPatternDetailedBets);
-			
-			// Event listeners para os botões do misturador
-			document.getElementById('generateMixedBtn').addEventListener('click', generateMixedBets);
-			document.getElementById('downloadMixedSimpleBtn').addEventListener('click', downloadMixedSimpleBets);
-			document.getElementById('downloadMixedDetailedBtn').addEventListener('click', downloadMixedDetailedBets);
-
-			// Event listeners para os inputs do misturador
-			const mixerInputs = [
-				document.getElementById('totalMixedBets'),
-				document.getElementById('configMixBets'),
-				document.getElementById('generatedMixBets'),
-				document.getElementById('patternMixBets'),
-				document.getElementById('specificMixBets')
-			];
-
-			mixerInputs.forEach(input => {
-				input.addEventListener('change', function() {
-					if (this.value < 0) this.value = 0;
-					adjustMixerDistribution();
-				});
-			});
             
             // Desabilitar botões de download de padrões inicialmente
             document.getElementById('downloadPatternSimpleBtn').disabled = true;
@@ -4861,265 +4362,6 @@
             specificComboSelect.addEventListener('change', updatePossibleNumbers);
             updatePossibleNumbers();
             setupTabs();
-			// FUNÇÕES PARA O MISTURADOR DE PALPITES
-
-		// Ajustar a distribuição do misturador para atingir o total desejado
-		function adjustMixerDistribution() {
-			const totalMixedBets = parseInt(document.getElementById('totalMixedBets').value);
-			const configMixBets = parseInt(document.getElementById('configMixBets').value) || 0;
-			const generatedMixBets = parseInt(document.getElementById('generatedMixBets').value) || 0;
-			const patternMixBets = parseInt(document.getElementById('patternMixBets').value) || 0;
-			const specificMixBets = parseInt(document.getElementById('specificMixBets').value) || 0;
-			
-			// Calcular o total atual
-			const currentTotal = configMixBets + generatedMixBets + patternMixBets + specificMixBets;
-			
-			// Se o total atual for diferente do desejado, ajustar automaticamente
-			if (currentTotal !== totalMixedBets && totalMixedBets > 0) {
-				// Calcular a proporção de cada tipo
-				const proportion = {
-					config: configMixBets / Math.max(currentTotal, 1),
-					generated: generatedMixBets / Math.max(currentTotal, 1),
-					pattern: patternMixBets / Math.max(currentTotal, 1),
-					specific: specificMixBets / Math.max(currentTotal, 1)
-				};
-				
-				// Ajustar os valores mantendo as proporções
-				document.getElementById('configMixBets').value = Math.round(proportion.config * totalMixedBets);
-				document.getElementById('generatedMixBets').value = Math.round(proportion.generated * totalMixedBets);
-				document.getElementById('patternMixBets').value = Math.round(proportion.pattern * totalMixedBets);
-				
-				// O último valor é ajustado para garantir que a soma seja exatamente igual ao total
-				const firstThree = 
-					Math.round(proportion.config * totalMixedBets) +
-					Math.round(proportion.generated * totalMixedBets) +
-					Math.round(proportion.pattern * totalMixedBets);
-					
-				document.getElementById('specificMixBets').value = totalMixedBets - firstThree;
-			}
-		}
-
-		// Gerar palpites misturados de diferentes seções
-		function generateMixedBets() {
-			const totalMixedBets = parseInt(document.getElementById('totalMixedBets').value);
-			
-			// Obter as quantidades desejadas de cada tipo de palpite
-			const configMixBets = parseInt(document.getElementById('configMixBets').value) || 0;
-			const generatedMixBets = parseInt(document.getElementById('generatedMixBets').value) || 0;
-			const patternMixBets = parseInt(document.getElementById('patternMixBets').value) || 0;
-			const specificMixBets = parseInt(document.getElementById('specificMixBets').value) || 0;
-			
-			// Verificar se há palpites suficientes gerados em cada seção
-			if (configMixBets > 0 && allGeneratedBets.length === 0) {
-				alert('Não há palpites gerados na seção Configurações. Gere-os primeiro ou reduza a quantidade solicitada.');
-				return;
-			}
-			
-			if (patternMixBets > 0 && patternGeneratedBets.length === 0) {
-				alert('Não há palpites gerados na seção Padrões de Dígitos. Gere-os primeiro ou reduza a quantidade solicitada.');
-				return;
-			}
-			
-			if (specificMixBets > 0 && specificGeneratedBets.length === 0) {
-				alert('Não há palpites gerados na seção Gerador por Combinação Específica. Gere-os primeiro ou reduza a quantidade solicitada.');
-				return;
-			}
-			
-			// Limpar o array de palpites misturados
-			mixedGeneratedBets = [];
-			
-			// Adicionar palpites de Configurações
-			if (configMixBets > 0 && allGeneratedBets.length > 0) {
-				// Se não houver palpites suficientes, usar os disponíveis repetidamente
-				for (let i = 0; i < configMixBets; i++) {
-					const index = i % allGeneratedBets.length;
-					const bet = JSON.parse(JSON.stringify(allGeneratedBets[index])); // Cópia profunda
-					bet.source = 'Configurações';
-					mixedGeneratedBets.push(bet);
-				}
-			}
-			
-			// Adicionar palpites gerados anteriormente
-			if (generatedMixBets > 0 && allGeneratedBets.length > 0) {
-				// Embaralhar os palpites para obter uma seleção aleatória
-				const shuffledBets = [...allGeneratedBets].sort(() => 0.5 - Math.random());
-				
-				for (let i = 0; i < generatedMixBets && i < shuffledBets.length; i++) {
-					const bet = JSON.parse(JSON.stringify(shuffledBets[i])); // Cópia profunda
-					bet.source = 'Palpites Gerados';
-					
-					// Evitar duplicatas
-					if (!mixedGeneratedBets.some(existingBet => 
-						existingBet.numbers.length === bet.numbers.length && 
-						existingBet.numbers.every((num, idx) => num === bet.numbers[idx])
-					)) {
-						mixedGeneratedBets.push(bet);
-					}
-				}
-			}
-			
-			// Adicionar palpites de padrões
-			if (patternMixBets > 0 && patternGeneratedBets.length > 0) {
-				for (let i = 0; i < patternMixBets; i++) {
-					const index = i % patternGeneratedBets.length;
-					const bet = JSON.parse(JSON.stringify(patternGeneratedBets[index])); // Cópia profunda
-					bet.source = 'Padrões de Dígitos';
-					
-					// Evitar duplicatas
-					if (!mixedGeneratedBets.some(existingBet => 
-						existingBet.numbers.length === bet.numbers.length && 
-						existingBet.numbers.every((num, idx) => num === bet.numbers[idx])
-					)) {
-						mixedGeneratedBets.push(bet);
-					}
-				}
-			}
-			
-			// Adicionar palpites específicos
-			if (specificMixBets > 0 && specificGeneratedBets.length > 0) {
-				for (let i = 0; i < specificMixBets; i++) {
-					const index = i % specificGeneratedBets.length;
-					const bet = JSON.parse(JSON.stringify(specificGeneratedBets[index])); // Cópia profunda
-					bet.source = 'Combinação Específica';
-					
-					// Evitar duplicatas
-					if (!mixedGeneratedBets.some(existingBet => 
-						existingBet.numbers.length === bet.numbers.length && 
-						existingBet.numbers.every((num, idx) => num === bet.numbers[idx])
-					)) {
-						mixedGeneratedBets.push(bet);
-					}
-				}
-			}
-			
-			// Limitar ao número total desejado
-			mixedGeneratedBets = mixedGeneratedBets.slice(0, totalMixedBets);
-			
-			// Embaralhar a ordem final dos palpites
-			mixedGeneratedBets.sort(() => 0.5 - Math.random());
-			
-			// Exibir os palpites misturados
-			displayMixedBets();
-		}
-
-		// Exibir palpites misturados
-		function displayMixedBets() {
-			const container = document.getElementById('mixedResultsContainer');
-			container.innerHTML = '';
-			
-			// Exibir container
-			document.getElementById('mixedBetsContainer').classList.remove('hidden');
-			
-			// Criar card para cada palpite
-			mixedGeneratedBets.forEach((bet, index) => {
-				const card = document.createElement('div');
-				card.className = 'p-4 bg-gray-100 dark:bg-gray-700 rounded';
-				
-				// Contagem de números por categoria
-				const lowCount = bet.numbers.filter(n => parseInt(n) <= 10).length;
-				const mediumCount = bet.numbers.filter(n => parseInt(n) > 10 && parseInt(n) <= 20).length;
-				const highCount = bet.numbers.filter(n => parseInt(n) > 20).length;
-				
-				// Cor da fonte para a fonte de origem
-				let sourceColor = 'text-gray-600';
-				if (bet.source === 'Padrões de Dígitos') {
-					sourceColor = 'text-indigo-600 dark:text-indigo-400';
-				} else if (bet.source === 'Combinação Específica') {
-					sourceColor = 'text-green-600 dark:text-green-400';
-				}
-				
-				// Conteúdo do card
-				let numbersHTML = '';
-				bet.numbers.forEach(num => {
-					let numberClass = '';
-					if (parseInt(num) <= 10) {
-						numberClass = 'number-low';
-					} else if (parseInt(num) <= 20) {
-						numberClass = 'number-medium';
-					} else {
-						numberClass = 'number-high';
-					}
-					
-					numbersHTML += `<span class="inline-block w-8 h-8 text-center leading-8 rounded-full mr-1 mb-1 ${numberClass}">${num}</span>`;
-				});
-				
-				card.innerHTML = `
-					<div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Palpite ${index + 1} <span class="${sourceColor} font-medium">(${bet.source})</span></div>
-					<div class="mb-2">${numbersHTML}</div>
-					<div class="text-sm text-gray-600 dark:text-gray-400">
-						<div>Combinação: ${bet.combination}</div>
-						<div>Distribuição: ${lowCount} B + ${mediumCount} M + ${highCount} A</div>
-					</div>
-				`;
-				
-				container.appendChild(card);
-			});
-			
-			// Atualizar altura da seção
-			mixerSection.updateHeight();
-		}
-
-		// Baixar palpites misturados (somente dezenas)
-		function downloadMixedSimpleBets() {
-			if (mixedGeneratedBets.length === 0) {
-				alert('Nenhum palpite misturado gerado ainda. Gere-os primeiro.');
-				return;
-			}
-			
-			let content = 'Palpites Misturados - Dia de Sorte\n\n';
-			
-			mixedGeneratedBets.forEach((bet, index) => {
-				content += `${index + 1}: ${bet.numbers.map(formatNumber).join(' ')}\n`;
-			});
-			
-			downloadFile('palpites_misturados_dia_de_sorte.txt', content);
-		}
-
-		// Baixar palpites misturados (detalhado)
-		function downloadMixedDetailedBets() {
-			if (mixedGeneratedBets.length === 0) {
-				alert('Nenhum palpite misturado gerado ainda. Gere-os primeiro.');
-				return;
-			}
-			
-			let content = 'Palpites Misturados - Dia de Sorte\n\n';
-			content += 'Estes palpites foram gerados combinando diferentes estratégias de geração de palpites.\n\n';
-			
-			mixedGeneratedBets.forEach((bet, index) => {
-				content += `Palpite ${index + 1}:\n`;
-				content += `Dezenas: ${bet.numbers.join(' ')}\n`;
-				content += `Origem: ${bet.source}\n`;
-				content += `Combinação de dígitos: ${bet.combination}\n`;
-				
-				if (bet.startPattern && bet.endPattern) {
-					content += `Padrão inicial: ${bet.startPattern}\n`;
-					content += `Padrão final: ${bet.endPattern}\n`;
-				}
-				
-				const lowCount = bet.numbers.filter(n => parseInt(n) <= 10).length;
-				const mediumCount = bet.numbers.filter(n => parseInt(n) > 10 && parseInt(n) <= 20).length;
-				const highCount = bet.numbers.filter(n => parseInt(n) > 20).length;
-				
-				content += `Distribuição: ${lowCount} baixas (1-10), ${mediumCount} médias (11-20), ${highCount} altas (21-31)\n\n`;
-			});
-			
-			content += 'Gerado por: Gerador de Palpites - Dia de Sorte\n';
-			content += 'Estratégia: Mistura de diferentes técnicas de geração de palpites\n';
-			
-			downloadFile('analise_palpites_misturados_dia_de_sorte.txt', content);
-			}
-			
-			// Função auxiliar para baixar arquivos
-			// Qualquer coisa excluir se não funcionar...
-			function downloadFile(filename, content) {
-				const element = document.createElement('a');
-				element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
-				element.setAttribute('download', filename);
-				element.style.display = 'none';
-				document.body.appendChild(element);
-				element.click();
-				document.body.removeChild(element);
-			}
         });
     </script>
     
