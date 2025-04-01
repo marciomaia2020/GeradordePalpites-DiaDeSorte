@@ -549,7 +549,7 @@
 
     <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-center text-primary">Gerador de Palpites - Dia de Sorte </span></h1> 
+            <h1 class="text-3xl font-bold text-center text-primary">Gerador de Palpites Baseado em Digitos - Dia de Sorte </span></h1> 
             
             <ul>
                 <li><a href="Selecao-De-Digitos.html">Digitos</a></li>
@@ -3712,7 +3712,7 @@
                             patternFrequency[i].frequency++;
                             patternExists = true;
                             break;
-                        }
+                        }analyzeFrequency
                     }
                     
                     // Se é um novo padrão, adicionar à lista
@@ -3738,283 +3738,6 @@
                 document.getElementById('digitPatternsStats').style.display = 'block';
             }
 
-            // Function to analyze the frequency of digit combinations in historical results
-            // function analyzeFrequency() {
-            //     const resultsText = document.getElementById('historicalResults').value.trim();
-            //     if (!resultsText) {
-            //         alert('Por favor, insira os resultados históricos.');
-            //         return;
-            //     }
-
-            //     const results = [];
-            //     const lines = resultsText.split('\n');
-                
-            //     // Reset statistics
-            //     numberCategoryStats = {
-            //         low: { count: 0, percentage: 0 },
-            //         medium: { count: 0, percentage: 0 },
-            //         high: { count: 0, percentage: 0 },
-            //         total: 0
-            //     };
-                
-            //     // Reset number frequency
-            //     for (let i = 1; i <= 31; i++) {
-            //         numberFrequency[i] = 0;
-            //     }
-                
-            //     // Reset month frequency
-            //     for (const month in monthFrequency) {
-            //         monthFrequency[month] = 0;
-            //     }
-                
-            //     // Reset pattern frequency
-            //     startDigitFrequency = {};
-            //     endDigitFrequency = {};
-            //     patternFrequency = [];
-
-            //     // Parse each line of results
-            //     for (const line of lines) {
-            //         if (line.trim() === '') continue;
-                    
-            //         // Split the line into words
-            //         const parts = line.trim().split(/\s+/);
-                    
-            //         // Check if the last part might be a month
-            //         let numbers = [];
-            //         let month = null;
-                    
-            //         // If we have at least 7 numbers
-            //         if (parts.length >= 7) {
-            //             // Try to parse the last item as a month
-            //             if (parts.length > 7) {
-            //                 const lastPart = parts[parts.length - 1];
-            //                 month = parseMonth(lastPart);
-                            
-            //                 if (month) {
-            //                     // If it's a month, exclude it from numbers
-            //                     numbers = parts.slice(0, -1).map(n => parseInt(n.trim()));
-            //                 } else {
-            //                     // No month found, all parts are numbers
-            //                     numbers = parts.map(n => parseInt(n.trim()));
-            //                 }
-            //             } else {
-            //                 // Exactly 7 parts, assume all are numbers
-            //                 numbers = parts.map(n => parseInt(n.trim()));
-            //             }
-                        
-            //             // Increment month frequency if a month was found
-            //             if (month) {
-            //                 monthFrequency[month]++;
-            //             }
-                        
-            //             results.push({
-            //                 numbers: numbers,
-            //                 month: month
-            //             });
-                        
-            //             // Count numbers by category for statistics
-            //             numbers.forEach(num => {
-            //                 if (num >= 1 && num <= 31) { // Ensure valid numbers only
-            //                     numberCategoryStats.total++;
-                                
-            //                     // Increment the frequency for this specific number
-            //                     numberFrequency[num] = (numberFrequency[num] || 0) + 1;
-                                
-            //                     if (num <= 10) {
-            //                         numberCategoryStats.low.count++;
-            //                     } else if (num <= 20) {
-            //                         numberCategoryStats.medium.count++;
-            //                     } else {
-            //                         numberCategoryStats.high.count++;
-            //                     }
-            //                 }
-            //             });
-            //         }
-            //     }
-
-            //     if (results.length === 0) {
-            //         alert('Nenhum resultado válido encontrado. Verifique o formato.');
-            //         return;
-            //     }
-                
-            //     // Analisar padrões de dígitos
-            //     analyzeDigitPatterns(results);
-                
-            //     // Renderiza o gráfico de estatísticas de categorias
-            //     renderNumberCategoryChart();
-                
-            //     // Renderiza a grade de frequência dos números
-            //     renderNumberFrequencyGrid();
-                
-            //     // Renderiza a frequência dos meses
-            //     renderMonthFrequency();
-
-            //     // Count digit occurrences in each result
-            //     const digitCombinationCounts = {};
-                
-            //     // Inicializar contadores para todas as combinações possíveis
-            //     validDigitCombinations.forEach(combo => {
-            //         digitCombinationCounts[combo] = 0;
-            //     });
-                
-            //     // Iterate through each result
-            //     results.forEach(result => {
-            //         // Get all digits from all numbers in this result
-            //         const allDigits = new Set();
-            //         result.numbers.forEach(num => {
-            //             getDigits(num).forEach(digit => allDigits.add(digit));
-            //         });
-                    
-            //         // Convert to array and sort
-            //         const digitsArray = Array.from(allDigits).sort((a, b) => a - b);
-                    
-            //         // Only consider results with 5 or more distinct digits
-            //         if (digitsArray.length >= 5) {
-            //             // Verificar quais das combinações válidas estão presentes neste resultado
-            //             validDigitCombinations.forEach(combo => {
-            //                 const comboDigits = combo.split(',').map(Number);
-                            
-            //                 // Verificar se todos os dígitos da combinação estão presentes
-            //                 if (comboDigits.every(digit => digitsArray.includes(digit))) {
-            //                     digitCombinationCounts[combo]++;
-            //                 }
-            //             });
-            //         }
-            //     });
-
-            //     // Guardar as frequências para uso posterior
-            //     drawnCombinations = {...digitCombinationCounts};
-                
-            //     // Convert to array for sorting
-            //     const combinationsArray = Object.entries(digitCombinationCounts)
-            //         .map(([combo, count]) => ({ combo, count }))
-            //         .sort((a, b) => b.count - a.count);
-
-            //     // Identificar combinações que ainda não foram sorteadas
-            //     undrawnCombinations = validDigitCombinations.filter(combo => 
-            //         digitCombinationCounts[combo] === 0
-            //     );
-                
-            //     // Atualizar contador de combinações não sorteadas
-            //     document.getElementById('undrawnCountDisplay').textContent = undrawnCombinations.length;
-                
-            //     // Display results
-            //     const frequencyResults = document.getElementById('frequencyResults');
-            //     const frequencyTableBody = document.getElementById('frequencyTableBody');
-            //     const topCombinations = document.getElementById('topCombinations');
-            //     const undrawnCombinationsContent = document.getElementById('undrawnCombinationsContent');
-
-            //     frequencyResults.classList.remove('hidden');
-            //     frequencyTableBody.innerHTML = '';
-            //     undrawnCombinationsContent.innerHTML = '';
-                
-            //     if (combinationsArray.length === 0) {
-            //         topCombinations.innerHTML = 'Nenhuma combinação de 5 dígitos encontrada nos resultados.';
-            //         return;
-            //     }
-
-            //     // Show the top combinations with highlighting for 5 digits
-            //     const top5Combos = combinationsArray.filter(item => item.count > 0).slice(0, 5);
-                
-            //     let topCombosHTML = `
-            //         <div class="font-bold text-xl mb-3 flex items-center">
-            //             Combinações de <span class="mx-1 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-0.5 rounded-full">5</span> Dígitos Mais Frequentes
-            //         </div>
-            //         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            //     `;
-                
-            //     top5Combos.forEach((item, index) => {
-            //         const percentage = ((item.count / results.length) * 100).toFixed(1);
-            //         topCombosHTML += `
-            //             <div class="bg-green-100 dark:bg-green-900 p-3 rounded-lg border-2 border-green-500">
-            //                 <div class="font-bold text-lg text-green-800 dark:text-green-200">${index + 1}. ${item.combo}</div>
-            //                 <div class="text-green-700 dark:text-green-300">
-            //                     ${item.count} de ${results.length} resultados (${percentage}%)
-            //                 </div>
-            //             </div>
-            //         `;
-            //     });
-                
-            //     topCombosHTML += `</div>`;
-                
-            //     // Adicionar informação sobre combinações que ainda não apareceram
-            //     topCombosHTML += `
-            //         <div class="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-            //             <div class="font-bold text-yellow-800 dark:text-yellow-200">
-            //                 ${undrawnCombinations.length} combinações ainda não apareceram em nenhum sorteio (de um total de ${validDigitCombinations.length})
-            //             </div>
-            //         </div>
-            //     `;
-                
-            //     topCombinations.innerHTML = topCombosHTML;
-                
-            //     // Mostrar as combinações não sorteadas
-            //     if (undrawnCombinations.length > 0) {
-            //         undrawnCombinations.forEach(combo => {
-            //             const comboDiv = document.createElement('div');
-            //             comboDiv.className = 'bg-blue-50 dark:bg-blue-800 p-2 rounded border border-blue-200 dark:border-blue-700';
-            //             comboDiv.innerHTML = `<div class="text-blue-800 dark:text-blue-200 font-medium">${combo}</div>`;
-            //             undrawnCombinationsContent.appendChild(comboDiv);
-            //         });
-                    
-            //         document.getElementById('undrawnCombinations').style.display = 'block';
-                    
-            //         // NOVA FUNCIONALIDADE: Preencher a área "Combinações de Dígitos" com apenas as não sorteadas
-            //         document.getElementById('digitCombinations').value = undrawnCombinations.join('\n');
-                    
-            //         // Atualizar a variável global para usar apenas as combinações não sorteadas
-            //         validDigitCombinations = [...undrawnCombinations];
-                    
-            //         // Atualizar o texto do cabeçalho
-            //         const combinationsHeader = document.querySelector('#digitCombinationsHeader h2');
-            //         if (combinationsHeader) {
-            //             combinationsHeader.innerHTML = `
-            //                 <span>Combinações de Dígitos</span> 
-            //                 <span class="text-sm font-bold ml-2 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full">(${undrawnCombinations.length})</span>
-            //             `;
-            //         }
-                    
-            //         // Limpar quaisquer palpites gerados anteriormente
-            //         document.getElementById('bettingResults').innerHTML = '';
-            //         document.getElementById('totalBetsCount').textContent = '0';
-            //         document.getElementById('lowCount').textContent = '0';
-            //         document.getElementById('mediumCount').textContent = '0';
-            //         document.getElementById('highCount').textContent = '0';
-                    
-            //         // Expandir a seção de combinações de dígitos
-            //         if (document.getElementById('digitCombinationsContainer').style.maxHeight === '0px') {
-            //             document.getElementById('digitCombinationsHeader').click();
-            //         }
-            //     } else {
-            //         document.getElementById('undrawnCombinations').style.display = 'none';
-            //     }
-
-            //     // Fill the frequency table with all combinations that appeared
-            //     combinationsArray.filter(item => item.count > 0).forEach(({ combo, count }) => {
-            //         const percentage = ((count / results.length) * 100).toFixed(1);
-                    
-            //         const row = document.createElement('tr');
-                    
-            //         // Destacar as combinações de 5 dígitos
-            //         row.classList.add('bg-green-100', 'dark:bg-green-800');
-            //         row.innerHTML = `
-            //             <td class="px-2 py-2 font-bold">${combo}</td>
-            //             <td class="px-2 py-2 font-bold">${count} de ${results.length}</td>
-            //             <td class="px-2 py-2 font-bold">${percentage}%</td>
-            //         `;
-                    
-            //         frequencyTableBody.appendChild(row);
-            //     });
-                
-            //     // Atualizar altura da seção de frequência após preenchimento
-            //     frequencySection.updateHeight();
-                
-            //     // Atualizar o dropdown para mostrar as frequências nas combinações
-            //     updateSpecificComboDropdown();
-                
-            //     // Disparar evento change para atualizar a exibição
-            //     specificComboSelect.dispatchEvent(new Event('change'));
-            // }
 
                 /**
                  * Padroniza um número para o formato de dois dígitos
@@ -4051,291 +3774,312 @@
                         return isNaN(num) ? NaN : num;
                     }).filter(num => !isNaN(num) && num >= 1 && num <= 31); // Filtrar para manter apenas números válidos entre 1 e 31
                 }
+function analyzeFrequency() {
+    const resultsText = document.getElementById('historicalResults').value.trim();
+    if (!resultsText) {
+        alert('Por favor, insira os resultados históricos.');
+        return;
+    }
 
+    const results = [];
+    const lines = resultsText.split('\n');
+    
+    // Reset statistics
+    numberCategoryStats = {
+        low: { count: 0, percentage: 0 },
+        medium: { count: 0, percentage: 0 },
+        high: { count: 0, percentage: 0 },
+        total: 0
+    };
+    
+    // Reset number frequency
+    for (let i = 1; i <= 31; i++) {
+        numberFrequency[i] = 0;
+    }
+    
+    // Reset month frequency
+    for (const month in monthFrequency) {
+        monthFrequency[month] = 0;
+    }
+    
+    // Reset pattern frequency
+    startDigitFrequency = {};
+    endDigitFrequency = {};
+    patternFrequency = [];
 
-
-            function analyzeFrequency() {
-                const resultsText = document.getElementById('historicalResults').value.trim();
-                if (!resultsText) {
-                    alert('Por favor, insira os resultados históricos.');
-                    return;
-                }
-
-                const results = [];
-                const lines = resultsText.split('\n');
+    // Parse each line of results
+    for (const line of lines) {
+        if (line.trim() === '') continue;
+        
+        // Split the line into words
+        const parts = line.trim().split(/\s+/);
+        
+        // Check if the last part might be a month
+        let numbers = [];
+        let month = null;
+        
+        // If we have at least 7 numbers
+        if (parts.length >= 7) {
+            // Try to parse the last item as a month
+            if (parts.length > 7) {
+                const lastPart = parts[parts.length - 1];
+                month = parseMonth(lastPart);
                 
-                // Reset statistics
-                numberCategoryStats = {
-                    low: { count: 0, percentage: 0 },
-                    medium: { count: 0, percentage: 0 },
-                    high: { count: 0, percentage: 0 },
-                    total: 0
-                };
-                
-                // Reset number frequency
-                for (let i = 1; i <= 31; i++) {
-                    numberFrequency[i] = 0;
-                }
-                
-                // Reset month frequency
-                for (const month in monthFrequency) {
-                    monthFrequency[month] = 0;
-                }
-                
-                // Reset pattern frequency
-                startDigitFrequency = {};
-                endDigitFrequency = {};
-                patternFrequency = [];
-
-                // Parse each line of results
-                for (const line of lines) {
-                    if (line.trim() === '') continue;
-                    
-                    // Split the line into words
-                    const parts = line.trim().split(/\s+/);
-                    
-                    // Check if the last part might be a month
-                    let numbers = [];
-                    let month = null;
-                    
-                    // If we have at least 7 numbers
-                    if (parts.length >= 7) {
-                        // Try to parse the last item as a month
-                        if (parts.length > 7) {
-                            const lastPart = parts[parts.length - 1];
-                            month = parseMonth(lastPart);
-                            
-                            if (month) {
-                                // Se for um mês, excluir da lista de números e processar os números
-                                const numberParts = parts.slice(0, -1);
-                                numbers = processNumberParts(numberParts);
-                            } else {
-                                // Se não for um mês, processar todos como números
-                                numbers = processNumberParts(parts);
-                            }
-                        } else {
-                            // Exatamente 7 partes, assumir que todos são números
-                            numbers = processNumberParts(parts);
-                        }
-                        
-                        // Incrementar a frequência do mês, se um mês foi encontrado
-                        if (month) {
-                            monthFrequency[month]++;
-                        }
-                        
-                        // Só processar resultados com pelo menos 7 números válidos
-                        if (numbers.length >= 7) {
-                            // Garantir apenas os primeiros 7 números
-                            const validNumbers = numbers.slice(0, 7);
-                            
-                            results.push({
-                                numbers: validNumbers,
-                                month: month
-                            });
-                            
-                            // Contar números por categoria para estatísticas
-                            validNumbers.forEach(num => {
-                                if (num >= 1 && num <= 31) { // Garantir apenas números válidos
-                                    numberCategoryStats.total++;
-                                    
-                                    // Incrementar a frequência para este número específico
-                                    numberFrequency[num] = (numberFrequency[num] || 0) + 1;
-                                    
-                                    if (num <= 10) {
-                                        numberCategoryStats.low.count++;
-                                    } else if (num <= 20) {
-                                        numberCategoryStats.medium.count++;
-                                    } else {
-                                        numberCategoryStats.high.count++;
-                                    }
-                                }
-                            });
-                        }
-                    }
-                }
-                if (results.length === 0) {
-                    alert('Nenhum resultado válido encontrado. Verifique o formato.');
-                    return;
-                }
-                
-                // Analisar padrões de dígitos
-                analyzeDigitPatterns(results);
-                
-                // Renderiza o gráfico de estatísticas de categorias
-                renderNumberCategoryChart();
-                
-                // Renderiza a grade de frequência dos números
-                renderNumberFrequencyGrid();
-                
-                // Renderiza a frequência dos meses
-                renderMonthFrequency();
-
-                // Count digit occurrences in each result
-                const digitCombinationCounts = {};
-                
-                // Inicializar contadores para todas as combinações possíveis
-                validDigitCombinations.forEach(combo => {
-                    digitCombinationCounts[combo] = 0;
-                });
-                
-                // Iterate through each result
-                results.forEach(result => {
-                    // Get all digits from all numbers in this result
-                    const allDigits = new Set();
-                    result.numbers.forEach(num => {
-                        getDigits(num).forEach(digit => allDigits.add(digit));
-                    });
-                    
-                    // Convert to array and sort
-                    const digitsArray = Array.from(allDigits).sort((a, b) => a - b);
-                    
-                    // Only consider results with 5 or more distinct digits
-                    if (digitsArray.length >= 5) {
-                        // Verificar quais das combinações válidas estão presentes neste resultado
-                        validDigitCombinations.forEach(combo => {
-                            const comboDigits = combo.split(',').map(Number);
-                            
-                            // Verificar se todos os dígitos da combinação estão presentes
-                            if (comboDigits.every(digit => digitsArray.includes(digit))) {
-                                digitCombinationCounts[combo]++;
-                            }
-                        });
-                    }
-                });
-
-                // Guardar as frequências para uso posterior
-                drawnCombinations = {...digitCombinationCounts};
-                
-                // Convert to array for sorting
-                const combinationsArray = Object.entries(digitCombinationCounts)
-                    .map(([combo, count]) => ({ combo, count }))
-                    .sort((a, b) => b.count - a.count);
-
-                // Identificar combinações que ainda não foram sorteadas
-                undrawnCombinations = validDigitCombinations.filter(combo => 
-                    digitCombinationCounts[combo] === 0
-                );
-                
-                // Atualizar contador de combinações não sorteadas
-                document.getElementById('undrawnCountDisplay').textContent = undrawnCombinations.length;
-                
-                // Display results
-                const frequencyResults = document.getElementById('frequencyResults');
-                const frequencyTableBody = document.getElementById('frequencyTableBody');
-                const topCombinations = document.getElementById('topCombinations');
-                const undrawnCombinationsContent = document.getElementById('undrawnCombinationsContent');
-
-                frequencyResults.classList.remove('hidden');
-                frequencyTableBody.innerHTML = '';
-                undrawnCombinationsContent.innerHTML = '';
-                
-                if (combinationsArray.length === 0) {
-                    topCombinations.innerHTML = 'Nenhuma combinação de 5 dígitos encontrada nos resultados.';
-                    return;
-                }
-
-                // Show the top combinations with highlighting for 5 digits
-                const top5Combos = combinationsArray.filter(item => item.count > 0).slice(0, 5);
-                
-                let topCombosHTML = `
-                    <div class="font-bold text-xl mb-3 flex items-center">
-                        Combinações de <span class="mx-1 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-0.5 rounded-full">5</span> Dígitos Mais Frequentes
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                `;
-                
-                top5Combos.forEach((item, index) => {
-                    const percentage = ((item.count / results.length) * 100).toFixed(1);
-                    topCombosHTML += `
-                        <div class="bg-green-100 dark:bg-green-900 p-3 rounded-lg border-2 border-green-500">
-                            <div class="font-bold text-lg text-green-800 dark:text-green-200">${index + 1}. ${item.combo}</div>
-                            <div class="text-green-700 dark:text-green-300">
-                                ${item.count} de ${results.length} resultados (${percentage}%)
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                topCombosHTML += `</div>`;
-                
-                // Adicionar informação sobre combinações que ainda não apareceram
-                topCombosHTML += `
-                    <div class="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-                        <div class="font-bold text-yellow-800 dark:text-yellow-200">
-                            ${undrawnCombinations.length} combinações ainda não apareceram em nenhum sorteio (de um total de ${validDigitCombinations.length})
-                        </div>
-                    </div>
-                `;
-                
-                topCombinations.innerHTML = topCombosHTML;
-                
-                // Mostrar as combinações não sorteadas
-                if (undrawnCombinations.length > 0) {
-                    undrawnCombinations.forEach(combo => {
-                        const comboDiv = document.createElement('div');
-                        comboDiv.className = 'bg-blue-50 dark:bg-blue-800 p-2 rounded border border-blue-200 dark:border-blue-700';
-                        comboDiv.innerHTML = `<div class="text-blue-800 dark:text-blue-200 font-medium">${combo}</div>`;
-                        undrawnCombinationsContent.appendChild(comboDiv);
-                    });
-                    
-                    document.getElementById('undrawnCombinations').style.display = 'block';
-                    
-                    // NOVA FUNCIONALIDADE: Preencher a área "Combinações de Dígitos" com apenas as não sorteadas
-                    document.getElementById('digitCombinations').value = undrawnCombinations.join('\n');
-                    
-                    // Atualizar a variável global para usar apenas as combinações não sorteadas
-                    validDigitCombinations = [...undrawnCombinations];
-                    
-                    // Atualizar o texto do cabeçalho
-                    const combinationsHeader = document.querySelector('#digitCombinationsHeader h2');
-                    if (combinationsHeader) {
-                        combinationsHeader.innerHTML = `
-                            <span>Combinações de Dígitos</span> 
-                            <span class="text-sm font-bold ml-2 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full">(${undrawnCombinations.length})</span>
-                        `;
-                    }
-                    
-                    // Limpar quaisquer palpites gerados anteriormente
-                    document.getElementById('bettingResults').innerHTML = '';
-                    document.getElementById('totalBetsCount').textContent = '0';
-                    document.getElementById('lowCount').textContent = '0';
-                    document.getElementById('mediumCount').textContent = '0';
-                    document.getElementById('highCount').textContent = '0';
-                    
-                    // Expandir a seção de combinações de dígitos
-                    if (document.getElementById('digitCombinationsContainer').style.maxHeight === '0px') {
-                        document.getElementById('digitCombinationsHeader').click();
-                    }
+                if (month) {
+                    // Se for um mês, excluir da lista de números e processar os números
+                    const numberParts = parts.slice(0, -1);
+                    numbers = processNumberParts(numberParts);
                 } else {
-                    document.getElementById('undrawnCombinations').style.display = 'none';
+                    // Se não for um mês, processar todos como números
+                    numbers = processNumberParts(parts);
                 }
-
-                // Fill the frequency table with all combinations that appeared
-                combinationsArray.filter(item => item.count > 0).forEach(({ combo, count }) => {
-                    const percentage = ((count / results.length) * 100).toFixed(1);
-                    
-                    const row = document.createElement('tr');
-                    
-                    // Destacar as combinações de 5 dígitos
-                    row.classList.add('bg-green-100', 'dark:bg-green-800');
-                    row.innerHTML = `
-                        <td class="px-2 py-2 font-bold">${combo}</td>
-                        <td class="px-2 py-2 font-bold">${count} de ${results.length}</td>
-                        <td class="px-2 py-2 font-bold">${percentage}%</td>
-                    `;
-                    
-                    frequencyTableBody.appendChild(row);
+            } else {
+                // Exatamente 7 partes, assumir que todos são números
+                numbers = processNumberParts(parts);
+            }
+            
+            // Incrementar a frequência do mês, se um mês foi encontrado
+            if (month) {
+                monthFrequency[month]++;
+            }
+            
+            // Só processar resultados com pelo menos 7 números válidos
+            if (numbers.length >= 7) {
+                // Garantir apenas os primeiros 7 números
+                const validNumbers = numbers.slice(0, 7);
+                
+                results.push({
+                    numbers: validNumbers,
+                    month: month
                 });
                 
-                // Atualizar altura da seção de frequência após preenchimento
-                frequencySection.updateHeight();
-                
-                // Atualizar o dropdown para mostrar as frequências nas combinações
-                updateSpecificComboDropdown();
-                
-                // Disparar evento change para atualizar a exibição
-                specificComboSelect.dispatchEvent(new Event('change'));
+                // Contar números por categoria para estatísticas
+                validNumbers.forEach(num => {
+                    if (num >= 1 && num <= 31) { // Garantir apenas números válidos
+                        numberCategoryStats.total++;
+                        
+                        // Incrementar a frequência para este número específico
+                        numberFrequency[num] = (numberFrequency[num] || 0) + 1;
+                        
+                        if (num <= 10) {
+                            numberCategoryStats.low.count++;
+                        } else if (num <= 20) {
+                            numberCategoryStats.medium.count++;
+                        } else {
+                            numberCategoryStats.high.count++;
+                        }
+                    }
+                });
             }
+        }
+    }
+    if (results.length === 0) {
+        alert('Nenhum resultado válido encontrado. Verifique o formato.');
+        return;
+    }
+    
+    // Analisar padrões de dígitos
+    analyzeDigitPatterns(results);
+    
+    // Renderiza o gráfico de estatísticas de categorias
+    renderNumberCategoryChart();
+    
+    // Renderiza a grade de frequência dos números
+    renderNumberFrequencyGrid();
+    
+    // Renderiza a frequência dos meses
+    renderMonthFrequency();
+
+    // Count digit occurrences in each result
+    const digitCombinationCounts = {};
+    
+    // Inicializar contadores para todas as combinações possíveis
+    validDigitCombinations.forEach(combo => {
+        digitCombinationCounts[combo] = 0;
+    });
+    
+    // Iterate through each result
+    results.forEach(result => {
+        // Get all digits from all numbers in this result
+        const allDigits = new Set();
+        result.numbers.forEach(num => {
+            getDigits(num).forEach(digit => allDigits.add(digit));
+        });
+        
+        // Convert to array and sort
+        const digitsArray = Array.from(allDigits).sort((a, b) => a - b);
+        
+        // Only consider results with 5 or more distinct digits
+        if (digitsArray.length >= 5) {
+            // Verificar quais das combinações válidas estão presentes neste resultado
+            validDigitCombinations.forEach(combo => {
+                const comboDigits = combo.split(',').map(Number);
+                
+                // Verificar se todos os dígitos da combinação estão presentes
+                if (comboDigits.every(digit => digitsArray.includes(digit))) {
+                    digitCombinationCounts[combo]++;
+                }
+            });
+        }
+    });
+
+    // Guardar as frequências para uso posterior
+    drawnCombinations = {...digitCombinationCounts};
+    
+    // Convert to array for sorting
+    const combinationsArray = Object.entries(digitCombinationCounts)
+        .map(([combo, count]) => ({ combo, count }))
+        .sort((a, b) => b.count - a.count);
+
+    // Identificar combinações que ainda não foram sorteadas
+    undrawnCombinations = validDigitCombinations.filter(combo => 
+        digitCombinationCounts[combo] === 0
+    );
+    
+    // Atualizar contador de combinações não sorteadas
+    document.getElementById('undrawnCountDisplay').textContent = undrawnCombinations.length;
+    
+    // Display results
+    const frequencyResults = document.getElementById('frequencyResults');
+    const frequencyTableBody = document.getElementById('frequencyTableBody');
+    const topCombinations = document.getElementById('topCombinations');
+    const undrawnCombinationsContent = document.getElementById('undrawnCombinationsContent');
+
+    // Garantir que as seções estejam visíveis
+    document.getElementById('numberCategoryStats').style.display = 'block';
+    document.getElementById('numberFrequencyStats').style.display = 'block';
+    document.getElementById('monthFrequencyStats').style.display = 'block';
+    document.getElementById('digitPatternsStats').style.display = 'block';
+
+    frequencyResults.classList.remove('hidden');
+    frequencyTableBody.innerHTML = '';
+    undrawnCombinationsContent.innerHTML = '';
+    
+    if (combinationsArray.length === 0) {
+        topCombinations.innerHTML = 'Nenhuma combinação de 5 dígitos encontrada nos resultados.';
+        return;
+    }
+
+    // Show the top combinations with highlighting for 5 digits
+    const top5Combos = combinationsArray.filter(item => item.count > 0).slice(0, 5);
+    
+    let topCombosHTML = `
+        <div class="font-bold text-xl mb-3 flex items-center">
+            Combinações de <span class="mx-1 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-0.5 rounded-full">5</span> Dígitos Mais Frequentes
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    `;
+    
+    top5Combos.forEach((item, index) => {
+        const percentage = ((item.count / results.length) * 100).toFixed(1);
+        topCombosHTML += `
+            <div class="bg-green-100 dark:bg-green-900 p-3 rounded-lg border-2 border-green-500">
+                <div class="font-bold text-lg text-green-800 dark:text-green-200">${index + 1}. ${item.combo}</div>
+                <div class="text-green-700 dark:text-green-300">
+                    ${item.count} de ${results.length} resultados (${percentage}%)
+                </div>
+            </div>
+        `;
+    });
+    
+    topCombosHTML += `</div>`;
+    
+    // Adicionar informação sobre combinações que ainda não apareceram
+    topCombosHTML += `
+        <div class="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+            <div class="font-bold text-yellow-800 dark:text-yellow-200">
+                ${undrawnCombinations.length} combinações ainda não apareceram em nenhum sorteio (de um total de ${validDigitCombinations.length})
+            </div>
+        </div>
+    `;
+    
+    topCombinations.innerHTML = topCombosHTML;
+    
+    // Mostrar as combinações não sorteadas
+    if (undrawnCombinations.length > 0) {
+        undrawnCombinations.forEach(combo => {
+            const comboDiv = document.createElement('div');
+            comboDiv.className = 'bg-blue-50 dark:bg-blue-800 p-2 rounded border border-blue-200 dark:border-blue-700';
+            comboDiv.innerHTML = `<div class="text-blue-800 dark:text-blue-200 font-medium">${combo}</div>`;
+            undrawnCombinationsContent.appendChild(comboDiv);
+        });
+        
+        document.getElementById('undrawnCombinations').style.display = 'block';
+        
+        // NOVA FUNCIONALIDADE: Preencher a área "Combinações de Dígitos" com apenas as não sorteadas
+        document.getElementById('digitCombinations').value = undrawnCombinations.join('\n');
+        
+        // Atualizar a variável global para usar apenas as combinações não sorteadas
+        validDigitCombinations = [...undrawnCombinations];
+        
+        // Atualizar o texto do cabeçalho
+        const combinationsHeader = document.querySelector('#digitCombinationsHeader h2');
+        if (combinationsHeader) {
+            combinationsHeader.innerHTML = `
+                <span>Combinações de Dígitos</span> 
+                <span class="text-sm font-bold ml-2 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full">(${undrawnCombinations.length})</span>
+            `;
+        }
+        
+        // Limpar quaisquer palpites gerados anteriormente
+        document.getElementById('bettingResults').innerHTML = '';
+        document.getElementById('totalBetsCount').textContent = '0';
+        document.getElementById('lowCount').textContent = '0';
+        document.getElementById('mediumCount').textContent = '0';
+        document.getElementById('highCount').textContent = '0';
+        
+        // Expandir a seção de combinações de dígitos
+        if (document.getElementById('digitCombinationsContainer').style.maxHeight === '0px') {
+            document.getElementById('digitCombinationsHeader').click();
+        }
+    } else {
+        document.getElementById('undrawnCombinations').style.display = 'none';
+    }
+
+    // Fill the frequency table with all combinations that appeared
+    combinationsArray.filter(item => item.count > 0).forEach(({ combo, count }) => {
+        const percentage = ((count / results.length) * 100).toFixed(1);
+        
+        const row = document.createElement('tr');
+        
+        // Destacar as combinações de 5 dígitos
+        row.classList.add('bg-green-100', 'dark:bg-green-800');
+        row.innerHTML = `
+            <td class="px-2 py-2 font-bold">${combo}</td>
+            <td class="px-2 py-2 font-bold">${count} de ${results.length}</td>
+            <td class="px-2 py-2 font-bold">${percentage}%</td>
+        `;
+        
+        frequencyTableBody.appendChild(row);
+    });
+    
+    // Atualizar altura da seção de frequência após preenchimento
+    frequencySection.updateHeight();
+    
+    // Atualizar o dropdown para mostrar as frequências nas combinações
+    updateSpecificComboDropdown();
+    
+    // Disparar evento change para atualizar a exibição
+    specificComboSelect.dispatchEvent(new Event('change'));
+    
+    // Verificar e expandir a seção de frequência se estiver fechada
+    if (document.getElementById('frequencyContainer').style.maxHeight === '0px') {
+        document.getElementById('frequencyHeader').click();
+    }
+    
+    // Verificar se as seções importantes estão visíveis
+    console.log("Status de exibição das seções após análise:");
+    console.log("Frequência de Dígitos:", document.getElementById('topCombinations').style.display);
+    console.log("Estatística de Dezenas:", document.getElementById('numberCategoryStats').style.display);
+    console.log("Frequência de Cada Dezena:", document.getElementById('numberFrequencyStats').style.display);
+    console.log("Frequência do Mês da Sorte:", document.getElementById('monthFrequencyStats').style.display);
+    console.log("Padrões de Dígitos:", document.getElementById('digitPatternsStats').style.display);
+    console.log("Combinações Não Sorteadas:", document.getElementById('undrawnCombinations').style.display);
+}
+
+
+
+
 
             // Função para analisar a frequência com resultados fornecidos diretamente
             function analyzeFrequencyWithData(resultsData) {
