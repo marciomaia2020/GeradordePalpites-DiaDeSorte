@@ -1,2 +1,3 @@
 # GeradordePalpites-DiaDeSorte
 teste
+teste
