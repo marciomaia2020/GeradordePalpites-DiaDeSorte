@@ -1,0 +1,312 @@
+<!-- Seção: Análise de Frequência -->
+<div class="mb-6">
+    <div class="flex items-center justify-between cursor-pointer mb-2" id="frequencyHeader">
+        <h2 class="text-xl font-semibold">Análise de Frequência de Resultados Anteriores</h2>
+        <svg class="h-6 w-6 text-gray-500 dark:text-gray-400 toggle-btn" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+    </div>
+    <div id="frequencyContainer" class="transition-height bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded" style="max-height: 500px; overflow: hidden;">
+        <div class="p-4">
+            <div class="mb-4">
+                <label class="block mb-1">Cole os resultados do Dia de Sorte (um por linha, números separados por espaço):</label>
+                <textarea id="historicalResults" rows="6" placeholder="Ex: 01 03 07 13 18 27 29 Jan
+04 07 09 10 14 20 25 Fev" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 text-base"></textarea>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Formato: "01 02 03 04 05 06 07 Jan" (incluindo o mês da sorte ao final se disponível)
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button id="analyzeBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
+                    Analisar Frequência
+                </button>
+                <div class="flex flex-col sm:flex-row gap-2 flex-grow">
+                    <select id="apiSelect" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base flex-grow">
+                        <option value="auto">Auto (Testar Todas as APIs)</option>
+                        <option value="caixa">API Caixa Oficial</option>
+                        <option value="heroku">API Heroku</option>
+                        <option value="brasilapi">API Brasil</option>
+                    </select>
+                    <select id="modeSelect" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base">
+                        <option value="both">Tentar Todos os Métodos</option>
+                        <option value="direct">Acesso Direto</option>
+                        <option value="proxy">Via Proxy CORS</option>
+                    </select>
+                </div>
+                <input type="number" id="concursoNum" placeholder="Nº do concurso (opcional)" min="1" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base w-48">
+                <div class="flex gap-2">
+                    <button id="fetchResultsBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
+                        <span id="fetchText">Buscar Resultados</span>
+                        <span id="loadingSpinner" class="spinner ml-2 hidden"></span>
+                    </button>
+                </div>
+            </div>
+            <div id="apiStatus" class="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded hidden">
+                <div class="font-semibold mb-1">Status da busca:</div>
+                <div id="apiStatusContent" class="text-sm"></div>
+            </div>
+            <div id="frequencyAnalysis" class="mt-4">
+                <div id="frequencyResults" class="hidden">
+                    <h3 class="text-lg font-semibold mb-2">Frequência de Dígitos</h3>
+                    <div id="topCombinations" class="bg-gray-100 dark:bg-gray-700 p-3 rounded mb-3">
+                        <!-- Será preenchido com as combinações mais frequentes -->
+                    </div>
+                    
+                    <!-- NOVA SEÇÃO: Estatística de dezenas por categoria -->
+                    <div id="numberCategoryStats" class="bg-indigo-900 p-3 rounded mb-3 text-center">
+                        <div class="font-bold text-xl mb-3 text-white">Estatística de Dezenas nos Sorteios Anteriores</div>
+                        <div class="stat-bars-container flex justify-center items-end h-20 mb-1 gap-4">
+                            <div class="stat-bar-group flex flex-col items-center">
+                                <div id="lowBar" class="bg-green-500 w-32 text-white font-bold flex justify-center items-center" style="height: 0%">57%</div>
+                                <div class="text-sm text-white mt-1">4 dezenas<br>baixas</div>
+                            </div>
+                            <div class="stat-bar-group flex flex-col items-center">
+                                <div id="mediumBar" class="bg-yellow-600 w-32 text-white font-bold flex justify-center items-center" style="height: 0%">14%</div>
+                                <div class="text-sm text-white mt-1">1 dezenas<br>Médias</div>
+                            </div>
+                            <div class="stat-bar-group flex flex-col items-center">
+                                <div id="highBar" class="bg-red-600 w-32 text-white font-bold flex justify-center items-center" style="height: 0%">29%</div>
+                                <div class="text-sm text-white mt-1">2 dezenas<br>Altas</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 mb-3">
+                            <div class="bg-green-800 p-3 rounded-lg text-left">
+                                <div class="font-bold text-white">Baixas (1-10)</div>
+                                <div id="lowNumberStats" class="text-green-200"></div>
+                            </div>
+                            <div class="bg-yellow-700 p-3 rounded-lg text-left">
+                                <div class="font-bold text-white">Médias (11-20)</div>
+                                <div id="mediumNumberStats" class="text-yellow-200"></div>
+                            </div>
+                            <div class="bg-red-800 p-3 rounded-lg text-left">
+                                <div class="font-bold text-white">Altas (21-31)</div>
+                                <div id="highNumberStats" class="text-red-200"></div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-300 italic">
+                            Esta estatística mostra a frequência de cada categoria de dezenas nos sorteios analisados.
+                            Use-a para ajustar sua estratégia de distribuição.
+                        </div>
+                    </div>
+                    
+                    <!-- NOVA SEÇÃO: Frequência por dezena -->
+                    <div id="numberFrequencyStats" class="bg-purple-900 p-3 rounded mb-3">
+                        <div class="font-bold text-xl mb-3 text-white">Frequência de Cada Dezena</div>
+                        <div id="numberFrequencyGrid" class="frequency-grid gap-3 mb-3">
+                            <!-- Será preenchido dinamicamente com as dezenas e suas frequências -->
+                        </div>
+                        <div class="text-sm text-gray-300 italic text-center mt-2">
+                            Esta estatística mostra quantas vezes cada dezena apareceu nos sorteios analisados.
+                            O número mais frequente está destacado com animação pulsante.
+                        </div>
+                    </div>
+                    
+                    <!-- NOVA SEÇÃO: Frequência dos meses da sorte -->
+                    <div id="monthFrequencyStats" class="bg-indigo-800 p-3 rounded mb-3">
+                        <div class="font-bold text-xl mb-3 text-white">Frequência do Mês da Sorte</div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                            <div id="monthJan" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Janeiro</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthFev" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Fevereiro</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthMar" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Março</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthAbr" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Abril</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthMai" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Maio</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthJun" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Junho</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthJul" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Julho</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthAgo" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Agosto</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthSet" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Setembro</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthOut" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Outubro</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthNov" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Novembro</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                            <div id="monthDez" class="bg-indigo-700 rounded p-2 text-center">
+                                <div class="text-lg font-bold text-white">Dezembro</div>
+                                <div class="text-2xl text-yellow-300">0</div>
+                                <div class="text-sm text-indigo-200">0.0%</div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-300 italic text-center">
+                            Estatística dos meses da sorte que mais aparecem nos sorteios anteriores.
+                        </div>
+                    </div>
+                    
+                    <!-- NOVA SEÇÃO: Padrões de dígitos (início igual e final igual) -->
+                    <div id="digitPatternsStats" class="bg-teal-900 p-3 rounded mb-3">
+                        <div class="font-bold text-xl mb-3 text-white">Padrões de Dígitos nos Sorteios</div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <!-- Dígitos iniciais (primeiro dígito) -->
+                            <div class="bg-teal-800 p-3 rounded-lg">
+                                <div class="font-bold text-lg text-white mb-2">Dígitos Iniciais</div>
+                                <div id="startDigitStats" class="space-y-2">
+                                    <!-- Mostrar apenas os 10 padrões mais frequentes -->
+                                    <div id="topStartDigitPatterns"></div>
+                                    <!-- Botão para mostrar/ocultar mais padrões -->
+                                    <div id="moreStartDigitPatterns" class="hidden-patterns">
+                                        <!-- Os padrões adicionais serão inseridos aqui -->
+                                    </div>
+                                    <div id="showMoreStartBtn" class="show-more-btn">Mostrar Mais</div>
+                                </div>
+                            </div>
+
+                            <!-- Dígitos finais (último dígito) -->
+                            <div class="bg-teal-800 p-3 rounded-lg">
+                                <div class="font-bold text-lg text-white mb-2">Dígitos Finais</div>
+                                <div id="endDigitStats" class="space-y-2">
+                                    <!-- Mostrar apenas os 10 padrões mais frequentes -->
+                                    <div id="topEndDigitPatterns"></div>
+                                    <!-- Botão para mostrar/ocultar mais padrões -->
+                                    <div id="moreEndDigitPatterns" class="hidden-patterns">
+                                        <!-- Os padrões adicionais serão inseridos aqui -->
+                                    </div>
+                                    <div id="showMoreEndBtn" class="show-more-btn">Mostrar Mais</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-teal-800 p-3 rounded-lg mb-3">
+                            <div class="font-bold text-lg text-white mb-2">Combinações Frequentes</div>
+                            <div id="frequentPatterns" class="overflow-x-auto">
+                                <table class="min-w-full text-white">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-3 py-2 text-left">Exemplo</th>
+                                            <th class="px-3 py-2 text-left">Padrão Inicial</th>
+                                            <th class="px-3 py-2 text-left">Padrão Final</th>
+                                            <th class="px-3 py-2 text-left">Ocorrências</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="patternExamples">
+                                        <!-- Será preenchido dinamicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Nova seção para seleção de padrões específicos -->
+                        <div class="bg-teal-800 p-3 rounded-lg mb-3">
+                            <div class="font-bold text-lg text-white mb-2">Gerar Palpites com Padrões Específicos</div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <div class="text-white mb-2">Selecione os Padrões Iniciais:</div>
+                                    <div id="startPatternSelectors" class="pattern-selector overflow-y-auto max-h-48">
+                                        <!-- Checkboxes serão inseridos aqui -->
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-white mb-2">Selecione os Padrões Finais:</div>
+                                    <div id="endPatternSelectors" class="pattern-selector overflow-y-auto max-h-48">
+                                        <!-- Checkboxes serão inseridos aqui -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 mb-4">
+                                <div class="text-white mb-2">Quantidade de palpites a gerar:</div>
+                                <input type="number" id="patternBetCount" value="5" min="1" max="20" class="p-2 border rounded w-full bg-teal-700 border-teal-600 text-white">
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button id="generateFromSelectedPatternsBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded">
+                                    Gerar Palpites dos Padrões Selecionados
+                                </button>
+                                <div class="flex gap-2">
+                                    <button id="downloadPatternSimpleBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Somente Dezenas
+                                    </button>
+                                    <button id="downloadPatternDetailedBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Baixar Detalhado
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button id="generateFromPatternBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded">
+                                Gerar Palpites baseados nos Padrões Frequentes
+                            </button>
+                        </div>
+                        
+                        <div class="text-sm text-gray-300 italic text-center mt-3">
+                            Esta estatística analisa os padrões de dígitos nos sorteios anteriores.
+                            Por exemplo: "3n 0" significa 3 números começando com dígito 0.
+                        </div>
+                    </div>
+                    
+                    <!-- Novo painel para combinações não sorteadas -->
+                    <div id="undrawnCombinations" class="bg-blue-100 dark:bg-blue-900 p-3 rounded mb-3">
+                        <div class="font-bold text-xl mb-3 text-blue-800 dark:text-blue-200 flex items-center">
+                            Combinações Ainda Não Sorteadas
+                            <span class="text-sm font-bold ml-2 bg-blue-200 dark:bg-blue-700 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded-full" id="undrawnCountDisplay"></span>
+                        </div>
+                        <div id="undrawnCombinationsContent" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                            <!-- Será preenchido com as combinações não sorteadas -->
+                        </div>
+                        <div class="mt-3 flex justify-end">
+                            <button id="downloadUndrawnBtn" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1 px-3 rounded">
+                                Baixar Lista
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-gray-700">
+                                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Combinação de Dígitos</th>
+                                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Frequência</th>
+                                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Porcentagem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="frequencyTableBody" class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <!-- Será preenchido dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
