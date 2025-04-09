@@ -648,26 +648,21 @@
                         <button id="analyzeBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
                             Analisar Frequência
                         </button>
-                        <div class="flex flex-col sm:flex-row gap-2 flex-grow">
-                            <select id="apiSelect" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base flex-grow">
-                                <option value="auto">Auto (Testar Todas as APIs)</option>
-                                <option value="caixa">API Caixa Oficial</option>
-                                <option value="heroku">API Heroku</option>
-                                <option value="brasilapi">API Brasil</option>
-                            </select>
-                            <select id="modeSelect" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base">
-                                <option value="both">Tentar Todos os Métodos</option>
-                                <option value="direct">Acesso Direto</option>
-                                <option value="proxy">Via Proxy CORS</option>
-                            </select>
-                        </div>
-                        <input type="number" id="concursoNum" placeholder="Nº do concurso (opcional)" min="1" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-base w-48">
-                        <div class="flex gap-2">
-                            <button id="fetchResultsBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
-                                <span id="fetchText">Buscar Resultados</span>
-                                <span id="loadingSpinner" class="spinner ml-2 hidden"></span>
-                            </button>
-                        </div>
+						<div class="flex flex-col sm:flex-row gap-2 flex-grow">
+							<div class="p-2 bg-gray-200 dark:bg-gray-700 rounded text-gray-700 dark:text-gray-300 text-sm">
+								Usando API Caixa via Proxy CORS
+							</div>
+						</div>
+						<div class="flex gap-2 mb-4">
+							<button id="fetchResultsBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
+								<span id="fetchText">Buscar Resultados</span>
+								<span id="loadingSpinner" class="spinner ml-2 hidden"></span>
+							</button>
+							<button id="updateCacheBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
+								<span id="updateCacheText">Atualizar Cache</span>
+								<span id="cacheInfo" class="text-xs ml-2"></span>
+							</button>
+						</div>						
                     </div>
                     <div id="apiStatus" class="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded hidden">
                         <div class="font-semibold mb-1">Status da busca:</div>
@@ -1245,6 +1240,14 @@
             const closeModalX = document.getElementById('closeModal');
 			const mixerSection = setupCollapsibleSection('mixerHeader', 'mixerContainer', false); // Nova seção do misturador
             
+			// Configurar o botão para atualizar o cache
+			document.getElementById('updateCacheBtn').addEventListener('click', function() {
+				fetchResultsFromAPIs(true); // Forçar atualização do cache
+			});
+
+			// Atualizar informações do botão de cache na inicialização
+			updateCacheButton();
+			
             // Show modal
             showModalBtn.addEventListener('click', function() {
                 modal.style.display = 'block';
@@ -2878,7 +2881,153 @@
                     URL.revokeObjectURL(url);
                 }, 100);
             }
+			// Função para verificar quando foi a última atualização do cache
+			function getLastCacheUpdateInfo() {
+				try {
+					const cacheInfo = localStorage.getItem('dia_de_sorte_cache_info');
+					if (!cacheInfo) return null;
+					
+					const info = JSON.parse(cacheInfo);
+					const lastUpdate = new Date(info.timestamp);
+					const now = new Date();
+					
+					// Calcular tempo decorrido
+					const diffMs = now - lastUpdate;
+					const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+					const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+					const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+					
+					let timeText = '';
+					if (diffDays > 0) {
+						timeText += `${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+					}
+					if (diffHours > 0) {
+						if (timeText) timeText += ', ';
+						timeText += `${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+					}
+					if (diffMinutes > 0 && diffDays === 0) { // Mostrar minutos apenas se não tiver passado mais de um dia
+						if (timeText) timeText += ' e ';
+						timeText += `${diffMinutes} minuto${diffMinutes > 1 ? 's' : ''}`;
+					}
+					
+					return {
+						lastConcurso: info.lastConcurso,
+						countConcursos: info.countConcursos,
+						timeAgo: timeText || 'agora mesmo',
+						timestamp: info.timestamp
+					};
+				} catch (error) {
+					console.error('Erro ao obter informações de cache:', error);
+					return null;
+				}
+			}
 
+			// Função para atualizar informações sobre o cache
+			function updateCacheInfo(lastConcurso, countConcursos) {
+				try {
+					const cacheInfo = {
+						lastConcurso: lastConcurso,
+						countConcursos: countConcursos,
+						timestamp: new Date().toISOString()
+					};
+					localStorage.setItem('dia_de_sorte_cache_info', JSON.stringify(cacheInfo));
+					return true;
+				} catch (error) {
+					console.error('Erro ao atualizar informações de cache:', error);
+					return false;
+				}
+			}
+
+			// Função para atualizar as informações do botão de cache
+			function updateCacheButton() {
+				const cacheInfo = getLastCacheUpdateInfo();
+				const cacheInfoElement = document.getElementById('cacheInfo');
+				
+				if (cacheInfoElement) {
+					if (cacheInfo) {
+						cacheInfoElement.textContent = `Atualizado há ${cacheInfo.timeAgo}`;
+					} else {
+						cacheInfoElement.textContent = 'Nunca atualizado';
+					}
+				}
+			}
+			// Função para buscar o último concurso
+			async function fetchLatestConcurso() {
+				try {
+					const url = API_CONFIG.CAIXA_URL;
+					const data = await fetchViaProxy(url, {
+						'Origin': 'https://loterias.caixa.gov.br',
+						'Referer': 'https://loterias.caixa.gov.br/'
+					});
+					
+					if (!data || !data.numero) {
+						throw new Error("Dados do concurso inválidos");
+					}
+					
+					return data;
+				} catch (error) {
+					console.error("Erro ao buscar último concurso:", error);
+					return null;
+				}
+			}
+
+			// Função para buscar um concurso específico
+			async function fetchConcursoData(concursoNum) {
+				try {
+					const url = `${API_CONFIG.CAIXA_URL}/${concursoNum}`;
+					
+					const data = await fetchViaProxy(url, {
+						'Origin': 'https://loterias.caixa.gov.br',
+						'Referer': 'https://loterias.caixa.gov.br/'
+					});
+					
+					if (!data || !data.numero) {
+						throw new Error("Dados do concurso inválidos");
+					}
+					
+					return data;
+				} catch (error) {
+					console.error(`Erro ao buscar concurso ${concursoNum}:`, error);
+					return null;
+				}
+			}
+
+			// Função para formatar os dados do concurso
+				// Função para formatar os dados do concurso
+				function formatConcursoData(data) {
+					if (!data || !data.listaDezenas || !Array.isArray(data.listaDezenas)) {
+						return null;
+					}
+					
+					let resultLine = data.listaDezenas.join(' ');
+					
+					// Adicionar o mês da sorte se disponível
+					// A API da Caixa usa o campo "nomeTimeCoracaoMesSorte" para o mês da sorte
+					if (data.nomeTimeCoracaoMesSorte) {
+						// Tenta obter a abreviação correta do mês
+						for (const [abbrev, name] of Object.entries(monthNameMap)) {
+							if (name.toLowerCase() === data.nomeTimeCoracaoMesSorte.toLowerCase()) {
+								resultLine += ' ' + abbrev;
+								break;
+							}
+						}
+					} else if (data.nomeMesDaSorte) {
+						// Caso alternativo, se o nome do campo mudar
+						for (const [abbrev, name] of Object.entries(monthNameMap)) {
+							if (name.toLowerCase() === data.nomeMesDaSorte.toLowerCase()) {
+								resultLine += ' ' + abbrev;
+								break;
+							}
+						}
+					}
+					
+					return resultLine;
+				}			
+			
+			
+			
+			
+			
             // Função para download dos palpites detalhados
             function downloadBets() {
                 if (allGeneratedBets.length === 0) {
@@ -4129,405 +4278,310 @@ function analyzeFrequency() {
                 throw new Error('Nenhum proxy CORS conseguiu acessar a URL');
             }
 
-            // ===== API CAIXA =====
-            async function fetchFromCaixaAPI(concursoNum = null, useProxy = false) {
-                try {
-                    // Verificar cache primeiro
-                    const cacheKey = concursoNum ? 
-                        `caixa_dia_de_sorte_${concursoNum}` : 
-                        'caixa_dia_de_sorte_latest';
-                    
-                    const cachedData = LOCAL_CACHE.getCached(cacheKey);
-                    
-                    if (cachedData) {
-                        console.log('Usando dados em cache para:', cacheKey);
-                        return {
-                            success: true,
-                            message: `Sucesso! Dados obtidos do cache local (${cachedData.length} concursos).`,
-                            formattedResults: cachedData.join('\n'),
-                            source: 'cache'
-                        };
-                    }
-                    
-                    // Constrói a URL baseada no parâmetro de concurso
-                    const url = concursoNum ? 
-                        `${API_CONFIG.CAIXA_URL}/${concursoNum}` : 
-                        API_CONFIG.CAIXA_URL;
-                    
-                    let data;
-                    
-                    if (useProxy) {
-                        // Acesso via proxy CORS
-                        console.log(`Buscando dados da Caixa via proxy: ${url}`);
-                        data = await fetchViaProxy(url, {
-                            'Origin': 'https://loterias.caixa.gov.br',
-                            'Referer': 'https://loterias.caixa.gov.br/'
-                        });
-                    } else {
-                        // Acesso direto
-                        console.log(`Buscando dados da Caixa diretamente: ${url}`);
-                        const response = await fetch(url, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                                'Origin': 'https://loterias.caixa.gov.br',
-                                'Referer': 'https://loterias.caixa.gov.br/'
-                            },
-                            mode: 'cors',
-                            credentials: 'omit'
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error(`Status HTTP: ${response.status}`);
-                        }
-                        
-                        data = await response.json();
-                    }
-                    
-                    console.log("Resposta da API Caixa:", data);
-                    
-                    if (data && data.listaDezenas && Array.isArray(data.listaDezenas)) {
-                        let resultLine = data.listaDezenas.join(' ');
-                        
-                        // Adicionar o mês da sorte se disponível
-                        if (data.nomeMesDaSorte) {
-                            // Tenta obter a abreviação correta do mês
-                            for (const [abbrev, name] of Object.entries(monthNameMap)) {
-                                if (name.toLowerCase() === data.nomeMesDaSorte.toLowerCase()) {
-                                    resultLine += ' ' + abbrev;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        const allResults = [resultLine];
-                        LOCAL_CACHE.setCached(cacheKey, allResults, 60); // Cache por 60 minutos
-                        
-                        return {
-                            success: true,
-                            message: `Sucesso! Dados obtidos da API oficial da Caixa (concurso ${data.numero}) ${useProxy ? 'via proxy' : 'diretamente'}.`,
-                            formattedResults: allResults.join('\n'),
-                            source: useProxy ? 'caixa-proxy' : 'caixa'
-                        };
-                    } else {
-                        throw new Error('Formato de dados inválido ou inesperado');
-                    }
-                } catch (error) {
-                    console.error(`Erro ao acessar API Caixa ${useProxy ? 'via proxy' : 'diretamente'}:`, error);
-                    return {
-                        success: false,
-                        message: `Falha na API Caixa ${useProxy ? '(via proxy)' : '(acesso direto)'}: ${error.message}`
-                    };
+			// ===== API CAIXA =====
+			// Função principal para API Caixa
+			async function fetchFromCaixaAPI(forceUpdate = false) {
+				try {
+					const cacheKey = 'caixa_dia_de_sorte_all_results';
+					
+					// Verificar cache primeiro, a menos que seja forçada uma atualização
+					if (!forceUpdate) {
+						const cachedData = LOCAL_CACHE.getCached(cacheKey);
+						
+						if (cachedData) {
+							console.log('Usando dados em cache para todos os concursos');
+							// Retornar todos os resultados do cache
+							return {
+								success: true,
+								message: `Sucesso! Dados obtidos do cache local (${cachedData.length} concursos).`,
+								formattedResults: cachedData.map(line => line.split(':')[1].trim()).join('\n'),
+								source: 'cache'
+							};
+						}
+					}
+					
+					// Se chegou aqui, precisamos buscar dados online
+					return await fetchAllConcursos();
+				} catch (error) {
+					console.error(`Erro ao acessar API Caixa:`, error);
+					return {
+						success: false,
+						message: `Falha na API Caixa: ${error.message}`
+					};
+				}
+			}
+
+			// Função auxiliar para buscar todos os concursos
+			async function fetchAllConcursos(useProxy) {
+				try {
+					// Primeiro, obter o último concurso para saber quantos existem
+					const latestResult = await fetchSpecificConcurso(null, useProxy);
+					
+					if (!latestResult.success) {
+						throw new Error("Não foi possível obter o número do último concurso");
+					}
+					
+					const lastConcursoNum = parseInt(latestResult.concursoNum);
+					console.log(`Último concurso: ${lastConcursoNum}`);
+					
+					// Atualizar a interface para mostrar o progresso
+					const apiStatusContent = document.getElementById('apiStatusContent');
+					if (apiStatusContent) {
+						apiStatusContent.innerHTML += `<br>Último concurso: ${lastConcursoNum}`;
+						apiStatusContent.innerHTML += `<br>Iniciando busca de todos os concursos...`;
+						apiStatusContent.innerHTML += `<div id="progressBar" class="w-full bg-gray-200 rounded-full h-2.5 mt-2 mb-2"><div class="bg-primary h-2.5 rounded-full" style="width: 0%"></div></div>`;
+						apiStatusContent.innerHTML += `<div id="progressText" class="text-xs text-center">0/${lastConcursoNum} concursos</div>`;
+					}
+					
+					// Array para armazenar todos os resultados
+					const allResults = [];
+					
+					// Guardar o último resultado que já obtivemos
+					allResults.push(`Concurso ${lastConcursoNum}: ${latestResult.formattedResults}`);
+					
+					// Configurar um atraso entre requisições para não sobrecarregar a API
+					const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+					
+					// Buscar concursos em lotes, começando do mais recente e indo até o primeiro
+					// Vamos buscar em ordem decrescente para ter os mais recentes primeiro
+					for (let i = lastConcursoNum - 1; i >= 1; i--) {
+						// Atualizar a barra de progresso a cada 5 concursos
+						if (i % 5 === 0 || i === 1) {
+							const progressBar = document.getElementById('progressBar')?.querySelector('div');
+							const progressText = document.getElementById('progressText');
+							if (progressBar) {
+								const progress = ((lastConcursoNum - i) / lastConcursoNum) * 100;
+								progressBar.style.width = `${progress}%`;
+							}
+							if (progressText) {
+								progressText.textContent = `${lastConcursoNum - i}/${lastConcursoNum} concursos`;
+							}
+						}
+						
+						try {
+							// Buscar este concurso
+							const result = await fetchSpecificConcurso(i, useProxy);
+							
+							// Adicionar ao array de resultados se for bem-sucedido
+							if (result.success) {
+								allResults.push(`Concurso ${i}: ${result.formattedResults}`);
+								console.log(`Concurso ${i} obtido com sucesso`);
+							} else {
+								console.warn(`Falha ao obter concurso ${i}: ${result.message}`);
+							}
+							
+							// Aguardar um breve intervalo para não sobrecarregar a API
+							await delay(300); // 300ms entre requisições
+						} catch (concursoError) {
+							console.error(`Erro ao buscar concurso ${i}:`, concursoError);
+						}
+					}
+					
+					// Atualizar a barra de progresso para 100%
+					const progressBar = document.getElementById('progressBar')?.querySelector('div');
+					const progressText = document.getElementById('progressText');
+					if (progressBar) progressBar.style.width = '100%';
+					if (progressText) progressText.textContent = `${lastConcursoNum}/${lastConcursoNum} concursos`;
+					
+					// Ordenar resultados por número de concurso (crescente)
+					allResults.sort((a, b) => {
+						const numA = parseInt(a.match(/Concurso (\d+):/)[1]);
+						const numB = parseInt(b.match(/Concurso (\d+):/)[1]);
+						return numA - numB;
+					});
+					
+					// Armazenar em cache
+					const cacheKey = 'caixa_dia_de_sorte_all_results';
+					LOCAL_CACHE.setCached(cacheKey, allResults, 60 * 24); // Cache por 24 horas
+					
+					// Atualizar informações do cache
+					updateCacheInfo(lastConcursoNum, allResults.length);
+					
+					// Retornar os resultados sem os prefixos "Concurso X:"
+					return {
+						success: true,
+						message: `Sucesso! Todos os ${allResults.length} concursos obtidos ${useProxy ? 'via proxy' : 'diretamente'}.`,
+						formattedResults: allResults.map(line => line.split(':')[1].trim()).join('\n'),
+						source: useProxy ? 'caixa-proxy' : 'caixa'
+					};
+				} catch (error) {
+					console.error(`Erro ao buscar todos os concursos:`, error);
+					return {
+						success: false,
+						message: `Falha ao buscar todos os concursos: ${error.message}`
+					};
+				}
+			}
+			// Função para buscar todos os concursos
+async function fetchAllConcursos() {
+    try {
+        // Primeiro, obter o último concurso para saber quantos existem
+        const latestData = await fetchLatestConcurso();
+        
+        if (!latestData) {
+            throw new Error("Não foi possível obter o número do último concurso");
+        }
+        
+        const lastConcursoNum = parseInt(latestData.numero);
+        console.log(`Último concurso: ${lastConcursoNum}`);
+        
+        // Atualizar a interface para mostrar o progresso
+        const apiStatusContent = document.getElementById('apiStatusContent');
+        if (apiStatusContent) {
+            apiStatusContent.innerHTML += `<br>Último concurso: ${lastConcursoNum}`;
+            apiStatusContent.innerHTML += `<br>Iniciando busca de todos os concursos...`;
+            apiStatusContent.innerHTML += `<div id="progressBar" class="w-full bg-gray-200 rounded-full h-2.5 mt-2 mb-2"><div class="bg-primary h-2.5 rounded-full" style="width: 0%"></div></div>`;
+            apiStatusContent.innerHTML += `<div id="progressText" class="text-xs text-center">0/${lastConcursoNum} concursos</div>`;
+        }
+        
+        // Array para armazenar todos os resultados
+        const allResults = [];
+        
+        // Adicionar o último concurso que já obtivemos
+        const formattedResult = formatConcursoData(latestData);
+        allResults.push(`Concurso ${lastConcursoNum}: ${formattedResult}`);
+        
+        // Configurar um atraso entre requisições para não sobrecarregar a API
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+        
+        // Buscar concursos em lotes, começando do mais recente e indo até o primeiro
+        for (let i = lastConcursoNum - 1; i >= 1; i--) {
+            // Atualizar a barra de progresso a cada 5 concursos
+            if (i % 5 === 0 || i === 1) {
+                const progressBar = document.getElementById('progressBar')?.querySelector('div');
+                const progressText = document.getElementById('progressText');
+                if (progressBar) {
+                    const progress = ((lastConcursoNum - i) / lastConcursoNum) * 100;
+                    progressBar.style.width = `${progress}%`;
+                }
+                if (progressText) {
+                    progressText.textContent = `${lastConcursoNum - i}/${lastConcursoNum} concursos`;
                 }
             }
             
-            // ===== API HEROKU =====
-            async function fetchFromHerokuAPI(useProxy = false) {
-                try {
-                    // Verificar cache primeiro
-                    const cacheKey = 'heroku_dia_de_sorte';
-                    const cachedData = LOCAL_CACHE.getCached(cacheKey);
-                    
-                    if (cachedData) {
-                        console.log('Usando dados em cache para Heroku API');
-                        return {
-                            success: true,
-                            message: 'Sucesso! Dados obtidos do cache local (API Heroku).',
-                            formattedResults: cachedData,
-                            source: 'cache'
-                        };
-                    }
-                    
-                    let data;
-                    
-                    if (useProxy) {
-                        // Acesso via proxy CORS
-                        console.log(`Buscando dados da Heroku API via proxy`);
-                        data = await fetchViaProxy(API_CONFIG.HEROKU_URL);
-                    } else {
-                        // Acesso direto  
-                        console.log(`Buscando dados da Heroku API diretamente`);
-                        const response = await fetch(API_CONFIG.HEROKU_URL, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error(`Status ${response.status}`);
-                        }
-                        
-                        data = await response.json();
-                    }
-                    
-                    console.log("Resposta da API Heroku:", data);
-                    
-                    if (data && Array.isArray(data)) {
-                        const formattedResults = data.map(contest => {
-                            // Início do resultado com as dezenas
-                            let resultLine = contest.dezenas.join(' ');
-                            
-                            // Adicionar o mês da sorte se disponível
-                            if (contest.mesDaSorte) {
-                                // Tenta obter a abreviação correta do mês
-                                for (const [abbrev, name] of Object.entries(monthNameMap)) {
-                                    if (name.toLowerCase() === contest.mesDaSorte.toLowerCase()) {
-                                        resultLine += ' ' + abbrev;
-                                        break;
-                                    }
-                                }
-                            }
-                            
-                            return resultLine;
-                        }).join('\n');
-                        
-                        // Armazenar em cache
-                        LOCAL_CACHE.setCached(cacheKey, formattedResults, 60); // Cache por 60 minutos
-                        
-                        return {
-                            success: true,
-                            message: `Sucesso! Dados obtidos da API Heroku (${data.length} concursos) ${useProxy ? 'via proxy' : 'diretamente'}.`,
-                            formattedResults: formattedResults,
-                            source: useProxy ? 'heroku-proxy' : 'heroku'
-                        };
-                    } else {
-                        throw new Error('Formato de dados inválido');
-                    }
-                } catch (error) {
-                    console.error(`Erro ao acessar API Heroku ${useProxy ? 'via proxy' : 'diretamente'}:`, error);
-                    return {
-                        success: false,
-                        message: `Falha na API Heroku ${useProxy ? '(via proxy)' : '(acesso direto)'}: ${error.message}`
-                    };
+            try {
+                // Buscar este concurso
+                const data = await fetchConcursoData(i);
+                
+                if (data) {
+                    const formatResult = formatConcursoData(data);
+                    allResults.push(`Concurso ${i}: ${formatResult}`);
+                    console.log(`Concurso ${i} obtido com sucesso`);
+                } else {
+                    console.warn(`Falha ao obter concurso ${i}`);
                 }
+                
+                // Aguardar um breve intervalo para não sobrecarregar a API
+                await delay(300); // 300ms entre requisições
+            } catch (concursoError) {
+                console.error(`Erro ao buscar concurso ${i}:`, concursoError);
             }
-            
-            // ===== API BRASIL =====
-            async function fetchFromBrasilAPI(useProxy = false) {
-                try {
-                    // Verificar cache primeiro
-                    const cacheKey = 'brasil_dia_de_sorte';
-                    const cachedData = LOCAL_CACHE.getCached(cacheKey);
-                    
-                    if (cachedData) {
-                        console.log('Usando dados em cache para Brasil API');
-                        return {
-                            success: true,
-                            message: 'Sucesso! Dados obtidos do cache local (API Brasil).',
-                            formattedResults: cachedData,
-                            source: 'cache'
-                        };
-                    }
-                    
-                    let data;
-                    
-                    if (useProxy) {
-                        // Acesso via proxy CORS
-                        console.log(`Buscando dados da Brasil API via proxy`);
-                        data = await fetchViaProxy(API_CONFIG.BRASIL_URL);
-                    } else {
-                        // Acesso direto
-                        console.log(`Buscando dados da Brasil API diretamente`);
-                        const response = await fetch(API_CONFIG.BRASIL_URL, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error(`Status ${response.status}`);
-                        }
-                        
-                        data = await response.json();
-                    }
-                    
-                    console.log("Resposta da API Brasil:", data);
-                    
-                    if (data && data.concursos && Array.isArray(data.concursos)) {
-                        const formattedResults = data.concursos.map(contest => {
-                            return contest.numeros.join(' ');
-                        }).join('\n');
-                        
-                        // Armazenar em cache
-                        LOCAL_CACHE.setCached(cacheKey, formattedResults, 60);
-                        
-                        return {
-                            success: true,
-                            message: `Sucesso! Dados obtidos da API Brasil (${data.concursos.length} concursos) ${useProxy ? 'via proxy' : 'diretamente'}.`,
-                            formattedResults: formattedResults,
-                            source: useProxy ? 'brasil-proxy' : 'brasil'
-                        };
-                    } else {
-                        throw new Error('Formato de dados inválido');
-                    }
-                } catch (error) {
-                    console.error(`Erro ao acessar API Brasil ${useProxy ? 'via proxy' : 'diretamente'}:`, error);
-                    return {
-                        success: false,
-                        message: `Falha na API Brasil ${useProxy ? '(via proxy)' : '(acesso direto)'}: ${error.message}`
-                    };
-                }
-            }
+        }
+        
+        // Atualizar a barra de progresso para 100%
+        const progressBar = document.getElementById('progressBar')?.querySelector('div');
+        const progressText = document.getElementById('progressText');
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressText) progressText.textContent = `${lastConcursoNum}/${lastConcursoNum} concursos`;
+        
+        // Ordenar resultados por número de concurso (crescente)
+        allResults.sort((a, b) => {
+            const numA = parseInt(a.match(/Concurso (\d+):/)[1]);
+            const numB = parseInt(b.match(/Concurso (\d+):/)[1]);
+            return numA - numB;
+        });
+        
+        // Armazenar em cache
+        const cacheKey = 'caixa_dia_de_sorte_all_results';
+        LOCAL_CACHE.setCached(cacheKey, allResults, 60 * 24); // Cache por 24 horas
+        
+        // Atualizar informações do cache
+        updateCacheInfo(lastConcursoNum, allResults.length);
+        
+        // Retornar os resultados sem os prefixos "Concurso X:"
+        return {
+            success: true,
+            message: `Sucesso! Todos os ${allResults.length} concursos obtidos.`,
+            formattedResults: allResults.map(line => line.split(':')[1].trim()).join('\n'),
+            source: 'caixa-proxy'
+        };
+    } catch (error) {
+        console.error(`Erro ao buscar todos os concursos:`, error);
+        return {
+            success: false,
+            message: `Falha ao buscar todos os concursos: ${error.message}`
+        };
+    }
+}
+			
+			
                 
-            // Função principal para buscar resultados de acordo com as configurações do usuário
-            async function fetchResultsFromAPIs() {
-                const spinner = document.getElementById('loadingSpinner');
-                const fetchText = document.getElementById('fetchText');
-                const apiStatus = document.getElementById('apiStatus');
-                const apiStatusContent = document.getElementById('apiStatusContent');
-                const apiSelect = document.getElementById('apiSelect');
-                const modeSelect = document.getElementById('modeSelect');
-                
-                const selectedAPI = apiSelect.value;
-                const accessMode = modeSelect.value; // direct, proxy, or both
-                
-                // Obter o número do concurso (se fornecido)
-                const concursoInput = document.getElementById('concursoNum');
-                const concursoNum = concursoInput.value ? parseInt(concursoInput.value) : null;
-                
-                // Show loading spinner and status
-                spinner.classList.remove('hidden');
-                fetchText.textContent = 'Buscando...';
-                apiStatus.classList.remove('hidden');
-                apiStatusContent.innerHTML = 'Iniciando busca de resultados...';
-                
-                if (concursoNum) {
-                    apiStatusContent.innerHTML += `<br>Buscando dados do concurso ${concursoNum}...`;
-                }
-                
-                // Clear any previous results
-                document.getElementById('historicalResults').value = '';
-                
-                try {
-                    // Se uma API específica foi selecionada
-                    if (selectedAPI !== 'auto') {
-                        apiStatusContent.innerHTML += `<br>API selecionada: ${selectedAPI}`;
-                        
-                        let result = null;
-                        
-                        // Tenta obter dados de acordo com o modo selecionado
-                        if (accessMode === 'direct' || accessMode === 'both') {
-                            apiStatusContent.innerHTML += '<br>Tentando acesso direto...';
-                            
-                            switch (selectedAPI) {
-                                case 'caixa':
-                                    result = await fetchFromCaixaAPI(concursoNum, false);
-                                    break;
-                                case 'heroku':
-                                    result = await fetchFromHerokuAPI(false);
-                                    break;
-                                case 'brasilapi':
-                                    result = await fetchFromBrasilAPI(false);
-                                    break;
-                            }
-                            
-                            if (result && result.success) {
-                                apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
-                                // Usar a nova função para analisar com os dados obtidos
-                                analyzeFrequencyWithData(result.formattedResults);
-                                
-                                spinner.classList.add('hidden');
-                                fetchText.textContent = 'Buscar Resultados';
-                                return;
-                            } else if (result) {
-                                apiStatusContent.innerHTML += `<br>❌ ${result.message}`;
-                            }
-                        }
-                        
-                        // Se o modo direto falhou ou foi pulado, tenta via proxy
-                        if (accessMode === 'proxy' || accessMode === 'both') {
-                            apiStatusContent.innerHTML += '<br>Tentando acesso via proxy CORS...';
-                            
-                            switch (selectedAPI) {
-                                case 'caixa':
-                                    result = await fetchFromCaixaAPI(concursoNum, true);
-                                    break;
-                                case 'heroku':
-                                    result = await fetchFromHerokuAPI(true);
-                                    break;
-                                case 'brasilapi':
-                                    result = await fetchFromBrasilAPI(true);
-                                    break;
-                            }
-                            
-                            if (result && result.success) {
-                                apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
-                                // Usar a nova função para analisar com os dados obtidos
-                                analyzeFrequencyWithData(result.formattedResults);
-                                
-                                spinner.classList.add('hidden');
-                                fetchText.textContent = 'Buscar Resultados';
-                                return;
-                            } else if (result) {
-                                apiStatusContent.innerHTML += `<br>❌ ${result.message}`;
-                            }
-                        }
-                        
-                        // Se chegou aqui, todas as tentativas falharam
-                        apiStatusContent.innerHTML += '<br>❌ Todas as tentativas falharam para a API selecionada.';
-                        apiStatusContent.innerHTML += '<br>⚠️ Tente outra API ou modifique os parâmetros da busca.';
-                    } else {
-                        // Modo automático - tenta todas as APIs
-                        apiStatusContent.innerHTML += '<br>Modo automático: testando múltiplas APIs...';
-                        
-                        // Array com todas as combinações de API e modo de acesso para tentar
-                        const apiOptions = [
-                            // Primeiro tenta Heroku (geralmente mais confiável)
-                            { name: 'heroku', fn: fetchFromHerokuAPI, params: [false], label: 'Heroku (direto)' },
-                            { name: 'heroku', fn: fetchFromHerokuAPI, params: [true], label: 'Heroku (proxy)' },
-                            
-                            // Depois Caixa
-                            { name: 'caixa', fn: fetchFromCaixaAPI, params: [concursoNum, false], label: 'Caixa (direto)' },
-                            { name: 'caixa', fn: fetchFromCaixaAPI, params: [concursoNum, true], label: 'Caixa (proxy)' },
-                            
-                            // Por último Brasil
-                            { name: 'brasilapi', fn: fetchFromBrasilAPI, params: [false], label: 'Brasil (direto)' },
-                            { name: 'brasilapi', fn: fetchFromBrasilAPI, params: [true], label: 'Brasil (proxy)' }
-                        ];
-                        
-                        // Tentar cada combinação de API e modo de acesso
-                        for (const option of apiOptions) {
-                            apiStatusContent.innerHTML += `<br>Tentando API ${option.label}...`;
-                            
-                            try {
-                                const result = await option.fn(...option.params);
-                                
-                                if (result.success) {
-                                    apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
-                                    // Usar a nova função para analisar com os dados obtidos
-                                    analyzeFrequencyWithData(result.formattedResults);
-                                    
-                                    spinner.classList.add('hidden');
-                                    fetchText.textContent = 'Buscar Resultados';
-                                    return;
-                                } else {
-                                    apiStatusContent.innerHTML += `<br>❌ ${result.message}`;
-                                }
-                            } catch (apiError) {
-                                apiStatusContent.innerHTML += `<br>❌ Erro inesperado: ${apiError.message}`;
-                            }
-                        }
-                        
-                        // Se chegou aqui, todas as APIs falharam
-                        apiStatusContent.innerHTML += '<br>❌ Todas as APIs falharam.';
-                        apiStatusContent.innerHTML += '<br>⚠️ Sugestões:';
-                        apiStatusContent.innerHTML += '<br>1. Verifique sua conexão com a internet';
-                        apiStatusContent.innerHTML += '<br>2. Tente novamente mais tarde';
-                        apiStatusContent.innerHTML += '<br>3. Insira manualmente os resultados da loteria';
-                    }
-                } catch (error) {
-                    apiStatusContent.innerHTML += `<br>❌ Erro geral: ${error.message}`;
-                    apiStatusContent.innerHTML += '<br>⚠️ Por favor, tente novamente ou insira os dados manualmente.';
-                } finally {
-                    spinner.classList.add('hidden');
-                    fetchText.textContent = 'Buscar Resultados';
-                    frequencySection.updateHeight();
-                }
-            }
+		// Função principal para buscar resultados de acordo com as configurações do usuário
+// Função principal para buscar resultados
+async function fetchResultsFromAPIs(forceUpdateCache = false) {
+    const spinner = document.getElementById('loadingSpinner');
+    const fetchText = document.getElementById('fetchText');
+    const apiStatus = document.getElementById('apiStatus');
+    const apiStatusContent = document.getElementById('apiStatusContent');
+    
+    // Show loading spinner and status
+    spinner.classList.remove('hidden');
+    fetchText.textContent = 'Buscando...';
+    apiStatus.classList.remove('hidden');
+    apiStatusContent.innerHTML = 'Iniciando busca de resultados...';
+    
+    // Verificar informações de cache
+    const cacheInfo = getLastCacheUpdateInfo();
+    if (cacheInfo) {
+        apiStatusContent.innerHTML += `<br>Cache disponível: ${cacheInfo.countConcursos} concursos, atualizado há ${cacheInfo.timeAgo}.`;
+    }
+    
+    // Clear any previous results
+    document.getElementById('historicalResults').value = '';
+    
+    try {
+        apiStatusContent.innerHTML += `<br>Usando API oficial da Caixa via proxy CORS...`;
+        
+        // Apenas um método: API da Caixa via proxy CORS
+        const result = await fetchFromCaixaAPI(forceUpdateCache);
+        
+        if (result && result.success) {
+            apiStatusContent.innerHTML += `<br>✅ ${result.message}`;
+            // Usar a nova função para analisar com os dados obtidos
+            analyzeFrequencyWithData(result.formattedResults);
+        } else {
+            apiStatusContent.innerHTML += `<br>❌ ${result?.message || 'Falha ao obter resultados'}`;
+            apiStatusContent.innerHTML += '<br>⚠️ Por favor, tente novamente mais tarde ou insira os dados manualmente.';
+        }
+    } catch (error) {
+        apiStatusContent.innerHTML += `<br>❌ Erro: ${error.message}`;
+        apiStatusContent.innerHTML += '<br>⚠️ Por favor, tente novamente ou insira os dados manualmente.';
+    } finally {
+        spinner.classList.add('hidden');
+        fetchText.textContent = 'Buscar Resultados';
+        frequencySection.updateHeight();
+        
+        // Atualizar informações do botão de cache
+        updateCacheButton();
+    }
+}
+
+
+
+// Função para atualizar as informações do botão de cache
+function updateCacheButton() {
+    const cacheInfo = getLastCacheUpdateInfo();
+    const cacheInfoElement = document.getElementById('cacheInfo');
+    
+    if (cacheInfoElement) {
+        if (cacheInfo) {
+            cacheInfoElement.textContent = `Atualizado há ${cacheInfo.timeAgo}`;
+        } else {
+            cacheInfoElement.textContent = 'Nunca atualizado';
+        }
+    }
+}
+
 
             // Add event listener for analyze button
             document.getElementById('analyzeBtn').addEventListener('click', analyzeFrequency);
